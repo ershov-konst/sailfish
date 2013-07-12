@@ -11,9 +11,9 @@ var
  * @returns {*}
  */
 function validateConfig(config){
-   if (config("rootPath")){
-      if (!fs.existSync(config("rootPath"))){
-         throw new Error("rootPath : '" + config("rootPath") + "' not found");
+   if (config["rootPath"]){
+      if (!fs.existsSync(config["rootPath"])){
+         throw new Error("rootPath : '" + config["rootPath"] + "' not found");
       }
    }
    else{
@@ -21,10 +21,10 @@ function validateConfig(config){
    }
 
    if (config["components"]){
-      config["components"] = nodePath.resolve(config("rootPath"), config["components"]);
+      config["components"] = nodePath.resolve(config["rootPath"], config["components"]);
 
-      if (!fs.existSync(config("components"))){
-         throw new Error("components : '" + config("components") + "' not found");
+      if (!fs.existsSync(config["components"])){
+         throw new Error("components : '" + config["components"] + "' not found");
       }
    }
    else{
@@ -32,10 +32,10 @@ function validateConfig(config){
    }
 
    if (config["controllers"]){
-      config["controllers"] = nodePath.resolve(config("rootPath"), config["controllers"]);
+      config["controllers"] = nodePath.resolve(config["rootPath"], config["controllers"]);
 
-      if (!fs.existSync(config("controllers"))){
-         throw new Error("controllers : '" + config("controllers") + "' not found");
+      if (!fs.existsSync(config["controllers"])){
+         throw new Error("controllers : '" + config["controllers"] + "' not found");
       }
    }
    else{
