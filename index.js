@@ -11,6 +11,20 @@ var
  * @returns {*}
  */
 function validateConfig(config){
+
+   function validateAndResolvePath(param){
+      if (config[param]){
+         config[param] = nodePath.resolve(config["rootPath"], config[param]);
+
+         if (!fs.existsSync(config[param])){
+            throw new Error(param + " : '" + config[param] + "' not found");
+         }
+      }
+      else{
+         throw new Error("config param '" + param + "' is not defined");
+      }
+   }
+
    if (config["rootPath"]){
       if (!fs.existsSync(config["rootPath"])){
          throw new Error("rootPath : '" + config["rootPath"] + "' not found");
@@ -20,27 +34,9 @@ function validateConfig(config){
       throw new Error("config param 'rootPath' is not defined");
    }
 
-   if (config["components"]){
-      config["components"] = nodePath.resolve(config["rootPath"], config["components"]);
-
-      if (!fs.existsSync(config["components"])){
-         throw new Error("components : '" + config["components"] + "' not found");
-      }
-   }
-   else{
-      throw new Error("config param 'components' is not defined");
-   }
-
-   if (config["controllers"]){
-      config["controllers"] = nodePath.resolve(config["rootPath"], config["controllers"]);
-
-      if (!fs.existsSync(config["controllers"])){
-         throw new Error("controllers : '" + config["controllers"] + "' not found");
-      }
-   }
-   else{
-      throw new Error("config param 'controllers' is not defined");
-   }
+   validateAndResolvePath("components");
+   validateAndResolvePath("controllers");
+   validateAndResolvePath("views");
 
    return config;
 }
