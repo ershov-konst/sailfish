@@ -1,4 +1,4 @@
-var Component = require("../../index.js");
+var Component = require("../../index.js").Component;
 
 module.exports = {
    index : function(req, res){

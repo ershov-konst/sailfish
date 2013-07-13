@@ -3,6 +3,8 @@
    "version": "0.0.1",
    "main" : "./index.js",
    "dependencies" : {
-      "express"  : "latest"
+      "express"  : "latest",
+      "dot" : "latest",
+      "requirejs" : "latest"
    }
 }

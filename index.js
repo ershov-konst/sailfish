@@ -64,10 +64,12 @@ module.exports = {
          var rootPath = config["rootPath"];
          var controllers = config["controllers"];
          var components  = config["components"];
+         var views  = config["views"];
          var port  = process.env.PORT || config["port"];
 
-         //static files for components
+         //static files
          app.use('/components', express.static(components));
+         app.use('/views', express.static(views));
 
          domain.run(function(){
 
@@ -75,7 +77,13 @@ module.exports = {
             process.domain["rootPath"]   = rootPath;
             process.domain["components"] = components;
             process.domain["controllers"]= controllers;
+            process.domain["views"]      = views;
             process.domain["core"]       = nodePath.join(__dirname, "client");
+
+            //render engine
+            app.set('views', views);
+            app.set('view engine', 'xhtml');
+            app.engine('xhtml', require('./lib/render'));
 
             //routing
             app.all(/\/(?:([^\/]*)\/?)?(?:([^\/]*)\/?)?(.*)?/, require('./lib/router.js'));
@@ -87,5 +95,6 @@ module.exports = {
             }
          });
       }
-   }
+   },
+   Component : require("./lib/Component.js")
 };
