@@ -65,11 +65,13 @@ module.exports = {
          var controllers = config["controllers"];
          var components  = config["components"];
          var views  = config["views"];
+         var core  = nodePath.join(__dirname, "sf_client");
          var port  = process.env.PORT || config["port"];
 
          //static files
          app.use('/components', express.static(components));
          app.use('/views', express.static(views));
+         app.use('/sf_client', express.static(core));
 
          domain.run(function(){
 
@@ -78,7 +80,7 @@ module.exports = {
             process.domain["components"] = components;
             process.domain["controllers"]= controllers;
             process.domain["views"]      = views;
-            process.domain["core"]       = nodePath.join(__dirname, "client");
+            process.domain["core"]       = core;
 
             //render engine
             app.set('views', views);
