@@ -3,7 +3,8 @@ var
    express = require('express'),
    app = express(),
    nodePath = require('path'),
-   fs = require('fs');
+   fs = require('fs'),
+   handlers = {};
 
 /**
  * Validate config and prepare config params
@@ -41,21 +42,35 @@ function validateConfig(config){
    return config;
 }
 
+/**
+ * run handlers
+ * @param event
+ * @param args
+ */
+function notifyEvent(event, args){
+   var a = handlers[event] = handlers[event] || [];
+   a.forEach(function(hdl){
+      hdl.apply(null, args);
+   })
+}
+
 module.exports = {
    server : {
       /**
-       * Обработка событий. Пока только error
+       * append event handler
+       * @param event
+       * @param fn
        */
       on : function(event, fn){
-         if (event == "error"){
-            domain.on("error", function(err){
-               console.log(err);
-               fn(err);
-            });
+         var a = handlers[event] = handlers[event] || [];
+         if (typeof fn == "function"){
+            a.push(fn);
          }
       },
       /**
-       * Запуск сервера
+       * run application
+       * @param config
+       * @param cb
        */
       run : function(config, cb){
 
@@ -67,6 +82,12 @@ module.exports = {
          var views  = config["views"];
          var core  = nodePath.join(__dirname, "sf_client");
          var port  = process.env.PORT || config["port"];
+
+         //less middleware
+         app.use('/components', require('less-middleware')({
+            src: components,
+            force : true
+         }));
 
          //static files
          app.use('/components', express.static(components));
@@ -89,6 +110,16 @@ module.exports = {
 
             //routing
             app.all(/\/(?:([^\/]*)\/?)?(?:([^\/]*)\/?)?(.*)?/, require('./lib/router.js'));
+
+            //errors handling
+            app.use(function(err, req, res, next) {
+               if (err){
+                  notifyEvent("error", [err, req, res]);
+               }
+               else{
+                  next();
+               }
+            });
 
             app.listen(port);
             console.log("sailfish application running at http://localhost:" + port);
