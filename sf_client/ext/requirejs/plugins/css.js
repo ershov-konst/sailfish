@@ -33,7 +33,7 @@
  *
  */
 
-define(['./css-normalize', './css-path-resolver'], function(normalize, csspr) {
+define(['./css-normalize', './path-resolver'], function(normalize, pr) {
   function indexOf(a, e) { for (var i=0, l=a.length; i < l; i++) if (a[i] === e) return i; return -1 }
 
   if (typeof window == 'undefined')
@@ -401,7 +401,7 @@ define(['./css-normalize', './css-path-resolver'], function(normalize, csspr) {
     if (cssAPI.attachBuffer(resourceId, load))
       return;
 
-    fileUrl = req.toUrl(csspr(resourceId));
+    fileUrl = req.toUrl(pr(cssId) + (!parse ? '.css' : '.less'));
     
     if (!alerted && testing) {
       alert(hackLinks ? 'hacking links' : 'not hacking');

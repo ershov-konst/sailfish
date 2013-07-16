@@ -6,9 +6,9 @@ requirejs.config({
       "js" : "ext/requirejs/plugins/js",
       "css" : "ext/requirejs/plugins/css",
       "html" : "ext/requirejs/plugins/html",
-      "css-normalize" : "../ext/requirejs/plugins/css-normalize",
-      "r-css" : "../ext/requirejs/plugins/r-css",
-      "css-builder" : "../ext/requirejs/plugins/css-builder",
-      "css-path-resolver" : "../ext/requirejs/plugins/css-path-resolver"
+      "css-normalize" : "ext/requirejs/plugins/css-normalize",
+      "css-builder" : "ext/requirejs/plugins/css-builder",
+      "doT" : "ext/dot/doT",
+      "text" : "ext/requirejs/plugins/text"
    }
 });
