@@ -1,20 +1,38 @@
 define("js!core", function(){
    return {
       bootUp : function(deps){
+
+         function _getCollection (className){
+            var
+               liveCollection,
+               deadCollection = [],
+               i, l;
+
+            if ("querySelectorAll" in document){
+               liveCollection = document.querySelectorAll("component[type='"+ className +"']");
+               for (i = 0, l = liveCollection.length; i < l; i++){
+                  deadCollection.push(liveCollection[i]);
+               }
+            }
+            else{
+               liveCollection = document.getElementsByTagName("component");
+               for (i = 0, l = liveCollection.length; i < l; i++){
+                  if (liveCollection[i].getAttribute("type") == className){
+                     deadCollection.push(liveCollection[i]);
+                  }
+               }
+            }
+            return deadCollection;
+         }
+
          require(deps, function(){
             var components = {};
             for (var i = 0, l = deps.length; i < l; i++){
-               var
-                  liveCollection = document.getElementsByTagNameNS("sf-component", deps[i].split("!")[1]),
-                  deadCollection = [];
+               var collection = _getCollection(deps[i].split("!")[1]);
 
-               for (var le = 0, leL = liveCollection.length; le < leL; le++){
-                  deadCollection.push(liveCollection[le]);
-               }
-
-               for (var de = 0, deL = deadCollection.length; de < deL; de++){
+               for (var dI = 0, dL = collection.length; dI < dL; dI++){
                   var
-                     comp = new (arguments[i])(deadCollection[de]),
+                     comp = new (arguments[i])(collection[dI]),
                      name = comp.getName();
                   if (name){
                      components[name] = comp;
@@ -22,7 +40,6 @@ define("js!core", function(){
                }
             }
          });
-
       },
       /**
        * https://github.com/dansdom/extend

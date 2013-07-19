@@ -7,15 +7,6 @@ module.exports = {
          content : new Component("ex.Button", {
             caption : "Hello world"
          })
-      },
-      function(err, file){
-         if (!err){
-            res.set('Content-Type', 'application/xhtml+xml');
-            res.send(file);
-         }
-         else{
-            throw err;
-         }
       });
    }
 };
