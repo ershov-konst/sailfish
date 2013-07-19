@@ -1,44 +1,38 @@
 define(function(){
-   return {
-      bootUp : function(deps){
+   var core;
+   return core = {
+      provideInnerElements : function(root){
+         var
+            collection,
+            result = {};
 
-         function _getCollection (className){
+         function _getCollection (root){
             var
-               liveCollection,
-               deadCollection = [],
-               i, l;
+               liveCollection = root.getElementsByTagName("component"),
+               deadCollection = [];
 
-            if ("querySelectorAll" in document){
-               liveCollection = document.querySelectorAll("component[type='"+ className +"']");
-               for (i = 0, l = liveCollection.length; i < l; i++){
-                  deadCollection.push(liveCollection[i]);
-               }
-            }
-            else{
-               liveCollection = document.getElementsByTagName("component");
-               for (i = 0, l = liveCollection.length; i < l; i++){
-                  if (liveCollection[i].getAttribute("type") == className){
-                     deadCollection.push(liveCollection[i]);
-                  }
-               }
+            for (var i = 0, l = liveCollection.length; i < l; i++){
+               deadCollection.push(liveCollection[i]);
             }
             return deadCollection;
          }
 
-         require(deps, function(){
-            var components = {};
-            for (var i = 0, l = deps.length; i < l; i++){
-               var collection = _getCollection(deps[i].split("!")[1]);
+         collection = _getCollection(root);
 
-               for (var dI = 0, dL = collection.length; dI < dL; dI++){
-                  var
-                     comp = new (arguments[i])(collection[dI]),
-                     name = comp.getName();
-                  if (name){
-                     components[name] = comp;
-                  }
-               }
+         for (var i = 0, l = collection.length; i < l; i++){
+            var
+               cName = collection[i].getAttribute("data-class"),
+               inst = new (require("js!" + cName))(collection[i]),
+               name = inst.name();
+            if (name){
+               result[name] = inst;
             }
+         }
+         return result;
+      },
+      bootUp : function(deps){
+         require(deps, function(){
+            core.provideInnerElements(document.body);
          });
       },
       /**

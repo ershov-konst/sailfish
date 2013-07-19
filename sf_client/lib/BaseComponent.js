@@ -18,10 +18,10 @@ define(["js!core", "js!Abstract"], function(core, Abstract){
          }
          this._container.setAttribute("id", this._id = this._generateId());
       },
-      getContainer : function(){
+      container : function(){
          return this._container;
       },
-      getName : function(){
+      name : function(){
          return this._options.name;
       },
       _createMarkup : function(){
