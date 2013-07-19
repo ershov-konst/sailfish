@@ -1,4 +1,4 @@
-define(function(){
+define("js!EventBus", function(){
 
    var EventBusClass = function() {
       this.listeners = {};

@@ -1,4 +1,4 @@
-define(function(){
+define("js!Deferred", function(){
 
    var Deferred = function(){
       this._chained = false;

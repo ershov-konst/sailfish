@@ -4,7 +4,8 @@ var
    app = express(),
    nodePath = require('path'),
    fs = require('fs'),
-   handlers = {};
+   handlers = {},
+   isDevelopment = 'development' == app.get('env');
 
 /**
  * Validate config and prepare config params
@@ -76,32 +77,42 @@ module.exports = {
 
          config = validateConfig(config);
 
-         var rootPath = config["rootPath"];
          var controllers = config["controllers"];
          var components  = config["components"];
          var views  = config["views"];
-         var core  = nodePath.join(__dirname, "sf_client");
+         var sf_client  = nodePath.join(__dirname, "sf_client");
+         var sf_build  = nodePath.join(__dirname, "sf_build");
          var port  = process.env.PORT || config["port"];
 
-         //less middleware
-         app.use('/components', require('less-middleware')({
-            src: components,
-            force : true
-         }));
+
+         if (isDevelopment) {
+            //less middleware
+            app.use('/components', require('less-middleware')({
+               src: components,
+               force : true
+            }));
+         }
+         else{
+
+            //TODO : предварительная синхронная конвертация less -> css
+            app.use('/sf_build', express.static(sf_build));
+         }
 
          //static files
          app.use('/components', express.static(components));
          app.use('/views', express.static(views));
-         app.use('/sf_client', express.static(core));
+         app.use('/sf_client', express.static(sf_client));
 
          domain.run(function(){
 
-            process.domain["express"]    = app;
-            process.domain["rootPath"]   = rootPath;
-            process.domain["components"] = components;
-            process.domain["controllers"]= controllers;
-            process.domain["views"]      = views;
-            process.domain["core"]       = core;
+            process.domain["isDevelopment"] = isDevelopment;
+            process.domain["express"]       = app;
+            process.domain["sfPath"]        = __dirname;
+            process.domain["components"]    = components;
+            process.domain["controllers"]   = controllers;
+            process.domain["views"]         = views;
+            process.domain["sf_client"]     = sf_client;
+            process.domain["sf_build"]      = sf_build;
 
             //render engine
             app.set('views', views);
@@ -122,7 +133,7 @@ module.exports = {
             });
 
             app.listen(port);
-            console.log("sailfish application running at http://localhost:" + port);
+            console.log("sailfish application running at http://localhost:" + port + " [" + (isDevelopment ? "development" : "production") + " mode]");
             if (typeof cb == "function"){
                cb();
             }

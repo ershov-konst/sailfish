@@ -1,4 +1,4 @@
-define(["js!CompoundComponent", "html!ex.TestCompound", "css!ex.TestCompound", "js!ex.Button"], function(CompoundComponent, dotTplFn){
+define("js!ex.TestCompound", ["js!CompoundComponent", "html!ex.TestCompound", "css!ex.TestCompound", "js!ex.Button"], function(CompoundComponent, dotTplFn){
 
    var TestCompound =  CompoundComponent.extend({
       _dotTplFn : dotTplFn,

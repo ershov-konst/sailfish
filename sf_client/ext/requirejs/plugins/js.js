@@ -6,7 +6,6 @@ define(["path-resolver"], function(pr){
          req([name], function (js) {
             onload(js);
          });
-
       }
    }
 });

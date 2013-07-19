@@ -1,4 +1,4 @@
-define(['require', './css-normalize', './css-path-resolver'], function(req, normalize, csspr) {
+define(['require', './css-normalize', './path-resolver'], function(req, normalize, pr) {
    var nodePrint = function() {};
    if (requirejs.tools)
       requirejs.tools.useLib(function(req) {
@@ -162,9 +162,7 @@ define(['require', './css-normalize', './css-path-resolver'], function(req, norm
       //store config
       cssAPI.config = cssAPI.config || config;
 
-      name += !parse ? '.css' : '.less';
-
-      var fileUrl = req.toUrl(csspr(name));
+      fileUrl = req.toUrl(pr(name) + (!parse ? '.css' : '.less'));
 
       //external URLS don't get added (just like JS requires)
       if (fileUrl.substr(0, 7) == 'http://' || fileUrl.substr(0, 8) == 'https://')

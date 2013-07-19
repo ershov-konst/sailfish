@@ -3,7 +3,14 @@ define(function(){
       var path = [];
 
       if (name.indexOf(".") > -1){ //если в имени содержиться точка, то понимаем, что это компонент
-         path.push("/components/");
+
+         if (typeof window == "undefined"){
+            var nodePath = require.nodeRequire("path");
+            path.push(nodePath.relative(process.domain["sfPath"], process.domain["components"]) + "/");
+         }
+         else{
+            path.push("/components/");
+         }
 
          if (name.indexOf("/") == -1){
             name = name.replace(/[^\.]+$/g, function(c){
