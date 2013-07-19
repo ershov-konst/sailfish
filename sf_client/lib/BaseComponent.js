@@ -1,4 +1,4 @@
-define("js!BaseComponent", ["js!core", "js!Abstract"], function(core, Abstract){
+define(["js!core", "js!Abstract"], function(core, Abstract){
 
    return Abstract.extend({
       _dotTplFn : null,

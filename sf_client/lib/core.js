@@ -1,4 +1,4 @@
-define("js!core", function(){
+define(function(){
    return {
       bootUp : function(deps){
 

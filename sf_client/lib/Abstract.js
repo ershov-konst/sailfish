@@ -1,4 +1,4 @@
-define("js!Abstract", ["js!Class", "js!EventBus"], function (Class, EventBus) {
+define(["js!Class", "js!EventBus"], function (Class, EventBus) {
 
    return Class.extend({
       _id : null,

@@ -1,4 +1,4 @@
-define("js!ParallelDeferred", ["js!Deferred"], function(Deferred){
+define(["js!Deferred"], function(Deferred){
    var ParallelDeferred = function(cfg){
       this._successResult = undefined;
       this._ready = false;

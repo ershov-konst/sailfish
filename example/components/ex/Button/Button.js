@@ -1,4 +1,4 @@
-define("js!ex.Button", ["js!BaseComponent", "html!ex.Button", "css!ex.Button"], function(BaseComponent, dotTplFn){
+define(["js!BaseComponent", "html!ex.Button", "css!ex.Button"], function(BaseComponent, dotTplFn){
 
    var Button =  BaseComponent.extend({
       _dotTplFn : dotTplFn,
