@@ -1,10 +1,12 @@
-define(['require', './css-normalize', './path-resolver'], function(req, normalize, pr) {
-   var nodePrint = function() {};
+define(['require', './css-normalize'], function (req, normalize) {
+   var nodePrint = function () {
+   };
    if (requirejs.tools)
-      requirejs.tools.useLib(function(req) {
-         req(['node/print'], function(_nodePrint) {
+      requirejs.tools.useLib(function (req) {
+         req(['node/print'], function (_nodePrint) {
             nodePrint = _nodePrint;
-         }, function(){});
+         }, function () {
+         });
       });
 
    var cssAPI = {};
@@ -18,7 +20,7 @@ define(['require', './css-normalize', './path-resolver'], function(req, normaliz
             nodePrint('Compressed CSS output to ' + Math.round(css.length / csslen * 100) + '%.');
             return css;
          }
-         catch(e) {
+         catch (e) {
             nodePrint('Compression module not installed. Use "npm install csso -g" to enable.');
             return css;
          }
@@ -92,7 +94,7 @@ define(['require', './css-normalize', './path-resolver'], function(req, normaliz
    // NB add @media query support for media imports
    var importRegEx = /@import\s*(url)?\s*(('([^']*)'|"([^"]*)")|\(('([^']*)'|"([^"]*)"|([^\)]*))\))\s*;?/g;
 
-   var loadCSSFile = function(fileUrl) {
+   var loadCSSFile = function (fileUrl) {
       var css = loadFile(fileUrl);
 
       // normalize the css (except import statements)
@@ -127,7 +129,7 @@ define(['require', './css-normalize', './path-resolver'], function(req, normaliz
 
       // load the import stylesheets and substitute into the css
       for (var i = 0; i < importUrls.length; i++)
-         (function(i) {
+         (function (i) {
             var importCSS = loadCSSFile(importUrls[i]);
             css = css.substr(0, importIndex[i]) + importCSS + css.substr(importIndex[i] + importLength[i]);
             var lenDiff = importCSS.length - importLength[i];
@@ -142,7 +144,7 @@ define(['require', './css-normalize', './path-resolver'], function(req, normaliz
    var baseUrl;
    var cssBase;
    var curModule;
-   cssAPI.load = function(name, req, load, config, parse) {
+   cssAPI.load = function (name, req, load, config, parse) {
       if (!baseUrl)
          baseUrl = config.baseUrl;
 
@@ -162,7 +164,9 @@ define(['require', './css-normalize', './path-resolver'], function(req, normaliz
       //store config
       cssAPI.config = cssAPI.config || config;
 
-      fileUrl = req.toUrl(pr(name) + (!parse ? '.css' : '.less'));
+      name += !parse ? '.css' : '.less';
+
+      var fileUrl = req.toUrl(name);
 
       //external URLS don't get added (just like JS requires)
       if (fileUrl.substr(0, 7) == 'http://' || fileUrl.substr(0, 8) == 'https://')
@@ -178,7 +182,7 @@ define(['require', './css-normalize', './path-resolver'], function(req, normaliz
       load();
    }
 
-   cssAPI.normalize = function(name, normalize) {
+   cssAPI.normalize = function (name, normalize) {
       if (name.substr(name.length - 4, 4) == '.css')
          name = name.substr(0, name.length - 4);
       return normalize(name);
@@ -187,7 +191,7 @@ define(['require', './css-normalize', './path-resolver'], function(req, normaliz
    //list of cssIds included in this layer
    var _layerBuffer = [];
    var _cssBuffer = [];
-   cssAPI.write = function(pluginName, moduleName, write, parse) {
+   cssAPI.write = function (pluginName, moduleName, write, parse) {
       //external URLS don't get added (just like JS requires)
       if (moduleName.substr(0, 7) == 'http://' || moduleName.substr(0, 8) == 'https://' || moduleName.substr(0, 2) == '//')
          return;
@@ -206,7 +210,7 @@ define(['require', './css-normalize', './path-resolver'], function(req, normaliz
          write("requirejs.s.contexts._.nextTick = function(f){f()}; require(['css'], function(css) { css.addBuffer('" + resourceName + "'); }); requirejs.s.contexts._.nextTick = requirejs.nextTick;");
    }
 
-   cssAPI.onLayerEnd = function(write, data, parser) {
+   cssAPI.onLayerEnd = function (write, data, parser) {
       firstWrite = true;
       //separateCSS parameter set either globally or as a layer setting
       var separateCSS = false;
