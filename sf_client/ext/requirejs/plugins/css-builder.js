@@ -1,4 +1,4 @@
-define(['require', './css-normalize'], function (req, normalize) {
+define(['require', './css-normalize', './path-resolver'], function (req, normalize, pr) {
    var nodePrint = function () {
    };
    if (requirejs.tools)
@@ -164,7 +164,7 @@ define(['require', './css-normalize'], function (req, normalize) {
       //store config
       cssAPI.config = cssAPI.config || config;
 
-      name += !parse ? '.css' : '.less';
+      name = pr(name, cssAPI.config) + (!parse ? '.css' : '.less');
 
       var fileUrl = req.toUrl(name);
 
@@ -196,7 +196,7 @@ define(['require', './css-normalize'], function (req, normalize) {
       if (moduleName.substr(0, 7) == 'http://' || moduleName.substr(0, 8) == 'https://' || moduleName.substr(0, 2) == '//')
          return;
 
-      var resourceName = moduleName + (!parse ? '.css' : '.less');
+      var resourceName = pr(moduleName) + (!parse ? '.css' : '.less');
       _layerBuffer.push(_cssBuffer[resourceName]);
 
       var separateCSS = false;

@@ -33,7 +33,7 @@
  *
  */
 
-define(['./css-normalize'], function (normalize) {
+define(['./css-normalize', './path-resolver'], function (normalize, pr) {
    function indexOf(a, e) {
       for (var i = 0, l = a.length; i < l; i++) if (a[i] === e) return i;
       return -1
@@ -403,7 +403,7 @@ define(['./css-normalize'], function (normalize) {
 
       waitSeconds = waitSeconds || config.waitSeconds || 7;
 
-      var resourceId = cssId + (!parse ? '.css' : '.less');
+      var resourceId = pr(cssId, config) + (!parse ? '.css' : '.less');
 
       // attach the load function to a buffer if there is one in registration
       // if not, we do a full injection load
