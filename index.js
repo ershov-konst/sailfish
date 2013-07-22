@@ -55,6 +55,75 @@ function notifyEvent(event, args){
    })
 }
 
+function run(config, cb){
+   var
+      controllers = config["controllers"],
+      components  = config["components"],
+      views  = config["views"],sf_client  = nodePath.join(__dirname, "sf_client"),
+      sf_build  = nodePath.join(__dirname, "sf_build"),
+      port  = process.env.PORT || config["port"];
+
+   if (isDevelopment) {
+      //less middleware
+      app.use('/components', require('less-middleware')({
+         src: components,
+         force : true
+      }));
+   }
+   else{
+      app.use('/sf_build', express.static(sf_build));
+   }
+
+   //static files
+   app.use('/components', express.static(components));
+   app.use('/views', express.static(views));
+   app.use('/sf_client', express.static(sf_client));
+
+   domain.run(function(){
+
+      process.domain["isDevelopment"] = isDevelopment;
+      process.domain["express"]       = app;
+      process.domain["sfPath"]        = __dirname;
+      process.domain["components"]    = components;
+      process.domain["controllers"]   = controllers;
+      process.domain["views"]         = views;
+      process.domain["sf_client"]     = sf_client;
+      process.domain["sf_build"]      = sf_build;
+
+      //render engine
+      app.set('views', views);
+      app.set('view engine', 'xhtml');
+      app.engine('xhtml', require('./lib/render'));
+
+      //routing
+      app.all(/\/(?:([^\/]*)\/?)?(?:([^\/]*)\/?)?(.*)?/, require('./lib/router.js'));
+
+      //errors handling
+      app.use(function(err, req, res, next) {
+         if (err){
+            notifyEvent("error", [err, req, res]);
+         }
+         else{
+            next();
+         }
+      });
+
+      app.listen(port);
+      console.log("sailfish application running at http://localhost:" + port + " [" + (isDevelopment ? "development" : "production") + " mode]");
+      if (typeof cb == "function"){
+         cb();
+      }
+   });
+}
+
+function compileLess(path, cb){
+   //TODO compile less, use 'walk' and 'less'
+
+   if (typeof cb === "function"){
+      cb();
+   }
+}
+
 module.exports = {
    server : {
       /**
@@ -74,70 +143,21 @@ module.exports = {
        * @param cb
        */
       run : function(config, cb){
-
          config = validateConfig(config);
 
-         var controllers = config["controllers"];
-         var components  = config["components"];
-         var views  = config["views"];
-         var sf_client  = nodePath.join(__dirname, "sf_client");
-         var sf_build  = nodePath.join(__dirname, "sf_build");
-         var port  = process.env.PORT || config["port"];
-
-
-         if (isDevelopment) {
-            //less middleware
-            app.use('/components', require('less-middleware')({
-               src: components,
-               force : true
-            }));
-         }
-         else{
-
-            //TODO : предварительная синхронная конвертация less -> css
-            app.use('/sf_build', express.static(sf_build));
-         }
-
-         //static files
-         app.use('/components', express.static(components));
-         app.use('/views', express.static(views));
-         app.use('/sf_client', express.static(sf_client));
-
-         domain.run(function(){
-
-            process.domain["isDevelopment"] = isDevelopment;
-            process.domain["express"]       = app;
-            process.domain["sfPath"]        = __dirname;
-            process.domain["components"]    = components;
-            process.domain["controllers"]   = controllers;
-            process.domain["views"]         = views;
-            process.domain["sf_client"]     = sf_client;
-            process.domain["sf_build"]      = sf_build;
-
-            //render engine
-            app.set('views', views);
-            app.set('view engine', 'xhtml');
-            app.engine('xhtml', require('./lib/render'));
-
-            //routing
-            app.all(/\/(?:([^\/]*)\/?)?(?:([^\/]*)\/?)?(.*)?/, require('./lib/router.js'));
-
-            //errors handling
-            app.use(function(err, req, res, next) {
+         if (!isDevelopment){
+            compileLess(config["components"], function(err){
                if (err){
-                  notifyEvent("error", [err, req, res]);
+                  throw err;
                }
                else{
-                  next();
+                  run(config, cb);
                }
             });
-
-            app.listen(port);
-            console.log("sailfish application running at http://localhost:" + port + " [" + (isDevelopment ? "development" : "production") + " mode]");
-            if (typeof cb == "function"){
-               cb();
-            }
-         });
+         }
+         else{
+            run(config, cb);
+         }
       }
    },
    Component : require("./lib/Component.js")
