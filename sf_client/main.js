@@ -1,6 +1,4 @@
 requirejs.config({
-   separateCSS : true,
-   optimize: "none",
    paths : {
       "path-resolver" : "sf_client/ext/requirejs/plugins/path-resolver",
       "js"            : "sf_client/ext/requirejs/plugins/js",
