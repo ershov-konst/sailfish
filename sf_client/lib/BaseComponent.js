@@ -9,12 +9,13 @@ define("js!BaseComponent", ["js!core", "js!Abstract"], function(core, Abstract){
       init : function(cfg){
          this._super(cfg);
 
-         this._parseCfg(cfg);
-
-
+         if (cfg instanceof Node){
+            this._container = cfg;
+            this._options = this._parseCfg(this._options, cfg);
+         }
 
          if (this._dotTplFn){
-            this._createMarkup();
+            this._createMarkup(this._container);
          }
          this._container.setAttribute("id", this._id = this._generateId());
       },
@@ -32,16 +33,21 @@ define("js!BaseComponent", ["js!core", "js!Abstract"], function(core, Abstract){
                parentNode = this._container ? this._container.parentNode : undefined;
 
             container.innerHTML = this._dotTplFn(this._options);
-            e = container.childNodes[0];
+            e = this._prepareContainer(this._container ? this._container : undefined, container.childNodes[0]);
 
             if (parentNode){
                parentNode.replaceChild(e, this._container);
             }
 
             this._container = e;
-            this._container.className = this._container.className + " ws-has-markup";
-            this._container.setAttribute("data-component", this._container.localName);
          }
+      },
+      _prepareContainer : function(placeholder, element){
+         element.setAttribute("class", element.getAttribute("class") + " ws-has-markup");
+         if (placeholder){
+            element.setAttribute("data-component", placeholder.localName);
+         }
+         return element;
       },
       _removeContainer : function(){
          var
@@ -49,12 +55,11 @@ define("js!BaseComponent", ["js!core", "js!Abstract"], function(core, Abstract){
 
          parent.removeChild(this._container);
       },
-      _parseCfg : function(cfg){
-         if (cfg instanceof Node){
-            this._container = cfg;
-            core.extend(true, this._options, JSON.parse(cfg.getAttribute("config") || "{}"));
-            this._options.name = cfg.getAttribute("name") || cfg.name;
-         }
+      _parseCfg : function(options, cfg){
+         var res = {};
+         core.extend(true, res, options, JSON.parse(cfg.getAttribute("config") || "{}"));
+         res.name = cfg.getAttribute("name") || cfg.name;
+         return res;
       },
       destroy : function(){
          this._removeContainer();

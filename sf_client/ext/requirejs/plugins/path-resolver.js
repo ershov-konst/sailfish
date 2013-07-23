@@ -1,11 +1,14 @@
 define(function(){
    return function(name, config){
-      var path = [];
+      var
+         path = [],
+         nodePath;
+      console.log("<--- " + name);
 
       if (name.indexOf(".") > -1){ //если в имени содержиться точка, то понимаем, что это компонент
 
          if (typeof window == "undefined"){
-            var nodePath = require.nodeRequire("path");
+            nodePath = require.nodeRequire("path");
             path.push(nodePath.relative(process.domain["sfPath"], process.domain["components"]) + "/");
          }
          else{
@@ -21,10 +24,17 @@ define(function(){
          name = name.replace(/\./g, "/");
       }
       else{
-         path.push("/sf_client/lib/")
+         if (typeof window == "undefined"){
+            nodePath = require.nodeRequire("path");
+            path.push(nodePath.relative(process.domain["sfPath"], process.domain["sf_client"]) + "/lib/");
+         }
+         else{
+            path.push("/sf_client/lib/")
+         }
       }
 
       path.push(name);
+      console.log("---> " + path.join(""));
 
       return path.join("");
    }

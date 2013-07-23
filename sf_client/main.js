@@ -1,5 +1,5 @@
 requirejs.config({
-   paths : {
+   "paths" : {
       "path-resolver" : "sf_client/ext/requirejs/plugins/path-resolver",
       "js"            : "sf_client/ext/requirejs/plugins/js",
       "css"           : "sf_client/ext/requirejs/plugins/css",

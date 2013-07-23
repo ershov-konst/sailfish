@@ -5,7 +5,7 @@ var
    nodePath = require('path'),
    fs = require('fs'),
    handlers = {},
-   isDevelopment = 'development' == app.get('env');
+   isDevelopment = 0/*'development' == app.get('env')*/;
 
 /**
  * Validate config and prepare config params
