@@ -4,6 +4,10 @@ define("js!ex.TestCompound", ["js!CompoundComponent", "html!ex.TestCompound", "c
       _dotTplFn : dotTplFn,
       init : function(cfg){
          this._super(cfg);
+
+         this._components["btn"].click(function(){
+            alert("test");
+         })
       }
    });
 
