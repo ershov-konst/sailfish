@@ -8,12 +8,24 @@ define("js!core", function(){
 
          function _getCollection (root){
             var
-               liveCollection = root.getElementsByTagName("component"),
+               components = root.querySelectorAll("[data-component]"),
                deadCollection = [];
 
-            for (var i = 0, l = liveCollection.length; i < l; i++){
-               deadCollection.push(liveCollection[i]);
+            for (var i = 0, l = components.length; i < l; i++){
+               if (components[i].localName == "component"){
+                  deadCollection.push(components[i]);
+               }
+               else{
+                  var p = components[i].parentNode;
+                  while(p !== null || !/ws-has-markup/.test(p.className)){
+                     p = p.parentNode;
+                  }
+                  if (p && p === root){
+                     deadCollection.push(p);
+                  }
+               }
             }
+
             return deadCollection;
          }
 
@@ -127,7 +139,7 @@ define("js!core", function(){
                      }
 
                      // Never move original objects, clone them
-                     target[ name ] = Extend(deep, clone, copy);
+                     target[ name ] = core.extend(deep, clone, copy);
 
                      // Don't bring in undefined values
                   } else if (copy !== undefined) {
