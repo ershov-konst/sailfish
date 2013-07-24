@@ -20,7 +20,7 @@ define(function(){
             });
          }
 
-         name = name.replace(/\./g, "/");
+         name = name.replace(/\./, "/");
       }
       else{
          if (typeof window == "undefined"){
