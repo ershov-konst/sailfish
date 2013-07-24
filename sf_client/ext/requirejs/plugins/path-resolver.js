@@ -3,7 +3,6 @@ define(function(){
       var
          path = [],
          nodePath;
-      console.log("<--- " + name);
 
       if (name.indexOf(".") > -1){ //если в имени содержиться точка, то понимаем, что это компонент
 
@@ -34,7 +33,6 @@ define(function(){
       }
 
       path.push(name);
-      console.log("---> " + path.join(""));
 
       return path.join("");
    }
