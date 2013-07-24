@@ -21,7 +21,7 @@ define("js!core", function(){
 
          for (var i = 0, l = collection.length; i < l; i++){
             var
-               cName = collection[i].getAttribute("data-class"),
+               cName = collection[i].getAttribute("data-component"),
                inst = new (require("js!" + cName))(collection[i]),
                name = inst.name();
             if (name){
