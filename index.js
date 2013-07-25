@@ -14,7 +14,7 @@ function createRequirejsCfg(path, cfg){
       result = {};
 
    extend(true, result, systemCfg, cfg);
-   fs.writeFileSync(path, "requirejs.config("+ JSON.stringify(result) +");");
+   fs.writeFileSync(path, "requirejs.config("+ JSON.stringify(result, null, 3) +");");
 }
 
 /**

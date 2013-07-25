@@ -5,10 +5,12 @@
    "views" : "./views",
    "requirejs" : {
       "paths" : {
-         "jQuery" : "/components/external/jquery-1.10.2.min"
+         "jQuery" : "components/ex/external/jquery-1.10.2.min"
       },
       "shim" : {
-         "jQuery" : ["jQuery"]
+         "jQuery" : {
+            "exports": "jQuery"
+         }
       }
    }
 }
