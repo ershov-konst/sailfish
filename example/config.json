@@ -2,5 +2,13 @@
    "port" : 777,
    "controllers" : "./controllers",
    "components" : "./components",
-   "views" : "./views"
+   "views" : "./views",
+   "requirejs" : {
+      "paths" : {
+         "jQuery" : "/components/external/jquery-1.10.2.min"
+      },
+      "shim" : {
+         "jQuery" : ["jQuery"]
+      }
+   }
 }

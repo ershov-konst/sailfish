@@ -5,7 +5,17 @@ var
    nodePath = require('path'),
    fs = require('fs'),
    handlers = {},
+   extend = require("node.extend"),
    isDevelopment = 'development' == app.get('env');
+
+function createRequirejsCfg(path, cfg){
+   var
+      systemCfg = require("./lib/requirejs.json"),
+      result = {};
+
+   extend(true, result, systemCfg, cfg);
+   fs.writeFileSync(path, "requirejs.config("+ JSON.stringify(result) +");");
+}
 
 /**
  * Validate config and prepare config params
@@ -64,9 +74,12 @@ function run(config, cb){
    var
       controllers = config["controllers"],
       components  = config["components"],
-      views  = config["views"],sf_client  = nodePath.join(__dirname, "sf_client"),
+      views  = config["views"],
+      sf_client  = nodePath.join(__dirname, "sf_client"),
       sf_build  = nodePath.join(__dirname, "sf_build"),
       port  = process.env.PORT || config["port"];
+
+   createRequirejsCfg(nodePath.join("sf_client", "main.js"), config["requirejs"]);
 
    if (isDevelopment) {
       //less middleware
