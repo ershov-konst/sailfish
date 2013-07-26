@@ -13,8 +13,21 @@ function createRequirejsCfg(path, cfg){
       systemCfg = require("./lib/requirejs.json"),
       result = {};
 
-   extend(true, result, systemCfg, cfg);
-   fs.writeFileSync(path, "requirejs.config("+ JSON.stringify(result, null, 3) +");");
+   extend(true, result, systemCfg, cfg["requirejs"] || {});
+
+   //config for client
+   fs.writeFileSync(nodePath.join(path, "main.js"), "requirejs.config("+ JSON.stringify(result, null, 3) +");");
+
+
+   //prepare config for working on nodejs
+   for (var i in result["paths"]){
+      if (result["paths"].hasOwnProperty(i)){
+         result["paths"][i] = result["paths"][i].replace(/^components/, cfg["components"]);
+      }
+   }
+
+   //config for client
+   fs.writeFileSync(nodePath.join(path, "main-server.js"), "requirejs.config("+ JSON.stringify(result, null, 3) +");");
 }
 
 /**
@@ -79,7 +92,7 @@ function run(config, cb){
       sf_build  = nodePath.join(__dirname, "sf_build"),
       port  = process.env.PORT || config["port"];
 
-   createRequirejsCfg(nodePath.join("sf_client", "main.js"), config["requirejs"]);
+   createRequirejsCfg(sf_client, config);
 
    if (isDevelopment) {
       //less middleware
