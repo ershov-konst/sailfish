@@ -12,5 +12,6 @@
             "exports": "jQuery"
          }
       }
-   }
+   },
+   "express" : {}
 }
