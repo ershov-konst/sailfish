@@ -17,6 +17,8 @@ define("js!BaseComponent", ["js!core", "js!Abstract"], function(core, Abstract){
          if (this._dotTplFn){
             this._createMarkup(this._container);
          }
+
+         this._container.removeAttribute("config");
          this._container.setAttribute("id", this._id = this._generateId());
       },
       container : function(){
@@ -45,7 +47,14 @@ define("js!BaseComponent", ["js!core", "js!Abstract"], function(core, Abstract){
       _prepareContainer : function(placeholder, element){
          element.setAttribute("class", element.getAttribute("class") + " ws-has-markup");
          if (placeholder){
-            element.setAttribute("data-component", placeholder.localName);
+            element.setAttribute("data-component", placeholder.getAttribute("data-component"));
+         }
+         if (typeof window == "undefined"){
+            var name = placeholder.getAttribute("name");
+            if (name){
+               element.setAttribute("name", name);
+            }
+            element.setAttribute("config", placeholder.getAttribute("config"));
          }
          return element;
       },

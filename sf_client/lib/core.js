@@ -16,12 +16,15 @@ define("js!core", function(){
                   deadCollection.push(components[i]);
                }
                else{
-                  var p = components[i].parentNode;
-                  while(p !== null || !/ws-has-markup/.test(p.className)){
-                     p = p.parentNode;
-                  }
-                  if (p && p === root){
-                     deadCollection.push(p);
+                  var p = components[i];
+                  while(p = p.parentNode){
+                     if (p === root){
+                        deadCollection.push(components[i]);
+                        break;
+                     }
+                     else if(/ws-has-markup/.test(p.className)){
+                        break;
+                     }
                   }
                }
             }
