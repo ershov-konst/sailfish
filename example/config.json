@@ -3,6 +3,7 @@
    "controllers" : "./controllers",
    "components" : "./components",
    "views" : "./views",
+   "favicon" : "./favicon.ico",
    "requirejs" : {
       "paths" : {
          "jQuery" : "components/ex/external/jquery-1.10.2.min"

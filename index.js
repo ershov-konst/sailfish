@@ -94,6 +94,10 @@ function run(config, cb){
 
    createRequirejsCfg(sf_client, config);
 
+   if (config["favicon"]){
+      app.use(express.favicon(nodePath.resolve(config["rootPath"], config["favicon"])));
+   }
+
    if (isDevelopment) {
       //less middleware
       app.use('/components', require('less-middleware')({
