@@ -3,6 +3,7 @@
    "version": "0.0.1",
    "main" : "./index.js",
    "dependencies" : {
+      "xmldom" : "latest",
       "async" : "latest",
       "node.extend" : "latest",
       "express"  : "latest",
