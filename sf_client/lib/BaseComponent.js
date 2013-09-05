@@ -28,7 +28,7 @@ define("js!BaseComponent", ["js!core", "js!Abstract"], function(core, Abstract){
          return this._options.name;
       },
       _createMarkup : function(){
-         if (!this._container || !/ws-has-markup/.test(this._container.className)){
+         if (!this._container || !/sf-has-markup/.test(this._container.className)){
             var
                e,
                container = document.createElement("div"),
@@ -45,7 +45,7 @@ define("js!BaseComponent", ["js!core", "js!Abstract"], function(core, Abstract){
          }
       },
       _prepareContainer : function(placeholder, element){
-         element.setAttribute("class", element.getAttribute("class") + " ws-has-markup");
+         element.setAttribute("class", element.getAttribute("class") + " sf-has-markup");
          if (placeholder){
             element.setAttribute("data-component", placeholder.getAttribute("data-component"));
          }

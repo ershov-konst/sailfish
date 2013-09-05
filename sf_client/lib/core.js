@@ -22,7 +22,7 @@ define("js!core", function(){
                         deadCollection.push(components[i]);
                         break;
                      }
-                     else if(/ws-has-markup/.test(p.className)){
+                     else if(/sf-has-markup/.test(p.className)){
                         break;
                      }
                   }
