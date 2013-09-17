@@ -9,6 +9,9 @@ define("js!Abstract", ["js!core", "js!Class", "js!EventBus"], function (core, Cl
          this._id = this._generateId();
          this._eventChannel = EventBus.channel(this._id);
       },
+      trigger : function(type, target){
+         this._eventChannel.trigger(type, target);
+      },
       on : function(type, callback, scope){
          this._eventChannel.on(type, callback, scope);
       },
