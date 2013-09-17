@@ -1,10 +1,11 @@
-define("js!Abstract", ["js!Class", "js!EventBus"], function (Class, EventBus) {
+define("js!Abstract", ["js!core", "js!Class", "js!EventBus"], function (core, Class, EventBus) {
 
    return Class.extend({
       _id : null,
       _eventChannel : null,
 
-      init : function(){
+      init : function(cfg){
+         this._options = core.extend(true, this._options, cfg);
          this._id = this._generateId();
          this._eventChannel = EventBus.channel(this._id);
       },
