@@ -41,7 +41,7 @@ define("js!Class", ["js!core"], function (core) {
                   return ret;
                };
             })(name, prop[name]) :
-            name == "_options" ? core.extend(true, this[name], prop[name]) : prop[name];
+            name == "_options" ? core.extend(true, this.prototype[name], prop[name]) : prop[name];
       }
 
       // The dummy class constructor
