@@ -65,10 +65,123 @@ define("js!BaseComponent", ["js!core", "js!Abstract"], function(core, Abstract){
          parent.removeChild(this._container);
       },
       _parseCfg : function(options, cfg){
-         var res = {};
-         core.extend(true, res, options, JSON.parse(cfg.getAttribute("config") || "{}"));
-         res.name = cfg.getAttribute("name") || cfg.name;
+         var
+            res = {},
+            parsed = this._parseMarkup(cfg);
+         core.extend(true, res, options, parsed);
          return res;
+      },
+      _parseMarkup : function(cfg){
+         function isNumber(n) {
+            return !isNaN(parseFloat(n)) && isFinite(n);
+         }
+         function parseElem(elem){
+            var result;
+
+            if (elem.nodeType === 3){ //TEXT_NODE
+               //если это любой непробейльный символ - считаем что это часть контента, иначе скорее всего перевод строки - пропускаем
+               result = /\S/.test(elem.textContent) ? {name : "content", value : elem.textContent} : false;
+            }
+            else if (elem.localName == "option"){
+               var obj = {};
+               obj["name"] = elem.getAttribute("name");
+               obj["value"]= elem.getAttribute("value");
+
+               if (elem.innerHTML.length){
+                  obj["value"] = elem.innerHTML.trim();
+               }
+
+               if (isNumber(obj["value"])){
+                  //is number
+                  obj["value"] = parseFloat(obj["value"]);
+               }
+               else if (obj["value"] === "false"){
+                  //is boolean "false"
+                  obj["value"] = false;
+               }
+               else if (obj["value"] === "true"){
+                  //is boolean "true"
+                  obj["value"] = true;
+               }
+
+               result = obj;
+            }
+            else if (elem.localName == "options"){
+               var
+                  isArray = /Array|array/.test(elem.getAttribute("type")),
+                  res = isArray ? [] : {},
+                  childRes,
+                  childNodes = elem.childNodes;
+
+               if (!isArray){
+                  for (var aI = 0, attrs = elem.attributes, aL = attrs.length; aI < aL; aI++){
+                     res[attrs[aI]["name"]] = attrs[aI]["value"];
+                  }
+               }
+
+               for (var i = 0, l = childNodes.length; i < l; i++){
+                  if ((childRes = parseElem(childNodes[i])) !== false){
+                     if (isArray){
+                        res.push(childRes["value"]);
+                     }
+                     else{
+                        if(childRes["name"] == "content" && res["content"]){
+                           res["content"] += childRes["value"];
+                        }
+                        else{
+                           res[childRes["name"]] = childRes["value"];
+                        }
+                     }
+                  }
+               }
+
+               result =  {
+                  "name" : elem.getAttribute("name") || "Object",
+                  "value": res
+               }
+            }
+            else if ("outerHTML" in elem){
+               result = {name : "content", value : elem.outerHTML};
+            }
+
+            return result;
+         }
+
+         if (cfg && typeof cfg.cloneNode === "function"){
+            var obj, childNodes;
+
+            try{
+               obj = (typeof cfg.getAttribute === "function")
+                  ? JSON.parse(cfg.getAttribute("config") || '{}')
+                  : {};
+            }
+            catch(e){
+               throw new Error("Ошибка разбор конфигурации для компонента");
+            }
+
+            obj.name = ((typeof cfg.getAttribute === "function") ? cfg.getAttribute("name") : null)
+               || obj.name || "";
+            //cfg = obj;
+
+            childNodes = cfg.childNodes;
+
+            if (childNodes.length){
+               for (var i = 0, l = childNodes.length; i < l; i++){
+                  var field = parseElem(childNodes[i]);
+                  if (field){
+                     if (field["name"] == "content"){
+                        obj["content"] = obj["content"] || "";
+                        obj["content"] += field["value"];
+                     }
+                     else{
+                        obj[field["name"]] = field["value"];
+                     }
+                  }
+               }
+            }
+         }
+
+         return obj;
       },
       destroy : function(){
          this._removeContainer();
