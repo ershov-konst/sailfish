@@ -47,8 +47,12 @@ define("js!Class", ["js!core"], function (core) {
       // The dummy class constructor
       function Class() {
          // All construction is actually done in the init method
-         if (!initializing && this.init)
+         if (!initializing && this.init){
+            if ("_options" in this && core.type(arguments[0]) === "object"){
+               this._options = core.extend(true, this._options, arguments[0]);
+            }
             this.init.apply(this, arguments);
+         }
       }
 
       // Populate our constructed prototype object
