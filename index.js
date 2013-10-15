@@ -8,6 +8,11 @@ var
    extend = require("node.extend"),
    isDevelopment = 'development' == app.get('env');
 
+/**
+ * Create and save config for requirejs
+ * @param {String} path path for save config
+ * @param {Object} cfg app configuration
+ */
 function createRequirejsCfg(path, cfg){
    var
       systemCfg = require("./lib/requirejs.json"),
@@ -26,14 +31,14 @@ function createRequirejsCfg(path, cfg){
       }
    }
 
-   //config for client
+   //config for server
    fs.writeFileSync(nodePath.join(path, "main-server.js"), "requirejs.config("+ JSON.stringify(result, null, 3) +");");
 }
 
 /**
  * Validate config and prepare config params
  * @param config
- * @returns {*}
+ * @returns {Object}
  */
 function validateConfig(config){
 
