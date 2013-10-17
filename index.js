@@ -23,11 +23,14 @@ function createRequirejsCfg(path, cfg){
    //config for client
    fs.writeFileSync(nodePath.join(path, "main.js"), "requirejs.config("+ JSON.stringify(result, null, 3) +");");
 
+   //this paths will be faked for working requirejs on server
+   result["fakePaths"] = [];
 
    //prepare config for working on nodejs
    for (var i in result["paths"]){
       if (result["paths"].hasOwnProperty(i)){
-         result["paths"][i] = result["paths"][i].replace(/^components/, cfg["components"]);
+         result["paths"][i] = nodePath.resolve(cfg["rootPath"], result["paths"][i]);
+         result["fakePaths"].push(i)
       }
    }
 
