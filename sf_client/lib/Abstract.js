@@ -4,8 +4,7 @@ define("js!Abstract", ["js!core", "js!Class", "js!EventBus"], function (core, Cl
       _id : null,
       _eventChannel : null,
 
-      init : function(cfg){
-         this._options = core.extend(true, this._options, cfg);
+      init : function(){
          this._id = this._generateId();
          this._eventChannel = EventBus.channel(this._id);
       },

@@ -154,6 +154,25 @@ define("js!core", function(){
 
          // Return the modified object
          return target;
+      },
+      /**
+       * type checking by Jon Bretman
+       * @param {*} o
+       * @return {String}
+       */
+      type: function(o){
+         if (o && o.nodeType === 1){
+            return 'element';
+         }
+
+         var match = Object.prototype.toString.call(o).match(/\[object (.*?)\]/);
+         var _type = match[1].toLowerCase();
+
+         if (_type === 'number' && isNaN(o)){
+            return 'nan';
+         }
+
+         return _type;
       }
    }
 });
