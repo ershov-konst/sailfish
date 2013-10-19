@@ -8,32 +8,48 @@ var
    extend = require("node.extend"),
    isDevelopment = 'development' == app.get('env');
 
+/**
+ * Create and save config for requirejs
+ * @param {String} path path for save config
+ * @param {Object} cfg app configuration
+ */
 function createRequirejsCfg(path, cfg){
    var
       systemCfg = require("./lib/requirejs.json"),
+      clientCfg = cfg["requirejs"] || {},
+      clientsPaths = [],
       result = {};
 
-   extend(true, result, systemCfg, cfg["requirejs"] || {});
+   clientsPaths = Object.keys(clientCfg["paths"] || {});
+
+   extend(true, result, systemCfg, clientCfg);
 
    //config for client
    fs.writeFileSync(nodePath.join(path, "main.js"), "requirejs.config("+ JSON.stringify(result, null, 3) +");");
 
+   //this paths will be faked for working requirejs on server
+   result["fakePaths"] = clientsPaths;
 
    //prepare config for working on nodejs
    for (var i in result["paths"]){
       if (result["paths"].hasOwnProperty(i)){
-         result["paths"][i] = result["paths"][i].replace(/^components/, cfg["components"]);
+         if (clientsPaths.indexOf(i) > -1){
+            result["paths"][i] = nodePath.resolve(cfg["rootPath"], result["paths"][i]);
+         }
+         else{
+            result["paths"][i] = nodePath.join(__dirname, result["paths"][i]);
+         }
       }
    }
 
-   //config for client
+   //config for server
    fs.writeFileSync(nodePath.join(path, "main-server.js"), "requirejs.config("+ JSON.stringify(result, null, 3) +");");
 }
 
 /**
  * Validate config and prepare config params
  * @param config
- * @returns {*}
+ * @returns {Object}
  */
 function validateConfig(config){
 
@@ -90,7 +106,10 @@ function run(config, cb){
       views  = config["views"],
       sf_client  = nodePath.join(__dirname, "sf_client"),
       sf_build  = nodePath.join(__dirname, "sf_build"),
-      port  = process.env.PORT || config["port"];
+      port  = process.env.PORT || config["port"],
+      appPath = config["rootPath"];
+
+   config["sf_client"] = sf_client;
 
    createRequirejsCfg(sf_client, config);
 
@@ -124,6 +143,7 @@ function run(config, cb){
       process.domain["views"]         = views;
       process.domain["sf_client"]     = sf_client;
       process.domain["sf_build"]      = sf_build;
+      process.domain["appPath"]       = appPath;
 
       //render engine
       app.set('views', views);

@@ -4,12 +4,13 @@
    "main" : "./index.js",
    "dependencies" : {
       "walk" : "latest",
-      "xmldom" : "latest",
+      "xmldom" : "https://github.com/Olegas/xmldom/tarball/master",
       "async" : "latest",
       "node.extend" : "latest",
       "express"  : "latest",
       "dot" : "latest",
       "requirejs" : "latest",
-      "less-middleware" : "latest"
+      "less-middleware" : "latest",
+      "less" : "latest"
    }
 }

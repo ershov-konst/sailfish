@@ -7,8 +7,13 @@ define(function(){
       if (name.indexOf(".") > -1){ //если в имени содержиться точка, то понимаем, что это компонент
 
          if (typeof window == "undefined"){
-            nodePath = require.nodeRequire("path");
-            path.push(nodePath.relative(process.domain["sfPath"], process.domain["components"]) + "/");
+            if (!config || config["mode"] == "optimization"){
+               nodePath = require.nodeRequire("path");
+               path.push(nodePath.relative(process.domain["sfPath"], process.domain["components"]) + "/");
+            }
+            else{
+               path.push(process.domain["components"] + "/");
+            }
          }
          else{
             path.push("/components/");
@@ -24,8 +29,13 @@ define(function(){
       }
       else{
          if (typeof window == "undefined"){
-            nodePath = require.nodeRequire("path");
-            path.push(nodePath.relative(process.domain["sfPath"], process.domain["sf_client"]) + "/lib/");
+            if (!config || config["mode"] == "optimization"){
+               nodePath = require.nodeRequire("path");
+               path.push(nodePath.relative(process.domain["sfPath"], process.domain["sf_client"]) + "/lib/");
+            }
+            else{
+               path.push(process.domain["sf_client"] + "/lib/");
+            }
          }
          else{
             path.push("/sf_client/lib/")
