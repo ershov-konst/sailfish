@@ -34,13 +34,17 @@ function createRequirejsCfg(path, cfg){
    for (var i in result["paths"]){
       if (result["paths"].hasOwnProperty(i)){
          if (clientsPaths.indexOf(i) > -1){
-            result["paths"][i] = nodePath.resolve(cfg["rootPath"], result["paths"][i]);
+            if (!/^(\/\/)|(http)/.test(result["paths"][i])){
+               result["paths"][i] = nodePath.resolve(cfg["rootPath"], result["paths"][i]);
+            }
          }
          else{
-            result["paths"][i] = nodePath.join(__dirname, result["paths"][i]);
+            result["paths"][i] = nodePath.relative(cfg["rootPath"], nodePath.join(__dirname, result["paths"][i]));
          }
       }
    }
+
+   result["baseUrl"] = cfg["rootPath"];
 
    //config for server
    fs.writeFileSync(nodePath.join(path, "main-server.js"), "requirejs.config("+ JSON.stringify(result, null, 3) +");");
@@ -110,6 +114,10 @@ function run(config, cb){
       appPath = config["rootPath"];
 
    config["sf_client"] = sf_client;
+
+   if(!fs.existsSync(sf_build)){
+      fs.mkdirSync(sf_build);
+   }
 
    createRequirejsCfg(sf_client, config);
 
