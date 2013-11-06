@@ -4,7 +4,7 @@
    "main" : "./index.js",
    "dependencies" : {
       "walk" : "latest",
-      "xmldom" : "https://github.com/Olegas/xmldom/tarball/master",
+      "tensor-xmldom" : "latest",
       "async" : "latest",
       "node.extend" : "latest",
       "express"  : "latest",
