@@ -21,8 +21,8 @@ var Sailfish = function(config){
    this.render = new render(this.config);
    this.router = new router(this.config);
 
-
-   this.config["isDevelopment"] = false/*'development' == this.app.get('env')*/;
+   this.config["isDevelopment"] = this.config["isDevelopment"] !== undefined ? this.config["isDevelopment"] : 'development' == this.app.get('env');
+   this.config["port"] = this.config["port"] || process.env.PORT;
 
    if (!this.config["isDevelopment"]){
       lessCompiler(config["components"], function(err){
@@ -143,11 +143,11 @@ Sailfish.prototype._run = function(){
 
    domain.run(function(){
       //path resolver use process.domain
-      process.domain["componentRelativePath"] = nodePath.relative(self.config["appPath"], self.config["components"]) + "/";
-      process.domain["libRelativePath"]       = nodePath.relative(self.config["appPath"], self.config["sf_client"]) + "/lib/";
+      process.domain["componentRelativePath"] = nodePath.relative(self.config["rootPath"], self.config["components"]) + "/";
+      process.domain["libRelativePath"]       = nodePath.relative(self.config["rootPath"], self.config["sf_client"]) + "/lib/";
 
       self.app.listen(self.config["port"]);
-      console.log("sailfish application running at http://localhost:" + self.config["sf_client"] + " [" + (self.config["isDevelopment"] ? "development" : "production") + " mode]");
+      console.log("sailfish application running at http://localhost:" + self.config["port"] + " [" + (self.config["isDevelopment"] ? "development" : "production") + " mode]");
       self._notify("start");
    });
 };
