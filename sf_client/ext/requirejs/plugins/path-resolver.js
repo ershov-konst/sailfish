@@ -1,14 +1,11 @@
 define(function(){
    return function(name, config){
-      var
-         path = [],
-         nodePath;
+      var path = [];
 
       if (name.indexOf(".") > -1){ //если в имени содержиться точка, то понимаем, что это компонент
 
          if (typeof window == "undefined"){
-            nodePath = require.nodeRequire("path");
-            path.push(nodePath.relative(process.domain["appPath"], process.domain["components"]) + "/");
+            path.push(process.domain["componentRelativePath"]);
          }
          else{
             path.push("/components/");
@@ -24,8 +21,7 @@ define(function(){
       }
       else{
          if (typeof window == "undefined"){
-            nodePath = require.nodeRequire("path");
-            path.push(nodePath.relative(process.domain["appPath"], process.domain["sf_client"]) + "/lib/");
+            path.push(process.domain["libRelativePath"]);
          }
          else{
             path.push("/sf_client/lib/")

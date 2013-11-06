@@ -1,62 +1,64 @@
 var
    domain = require('domain').create(),
    express = require('express'),
-   app = express(),
    nodePath = require('path'),
    fs = require('fs'),
-   handlers = {},
    extend = require("node.extend"),
-   isDevelopment = 'development' == app.get('env');
+   lessCompiler = require("./lib/lessCompiler"),
+   render = require("./lib/render"),
+   router = require("./lib/router");
 
 /**
- * Create and save config for requirejs
- * @param {String} path path for save config
- * @param {Object} cfg app configuration
+ * @param config
+ * @constructor
  */
-function createRequirejsCfg(path, cfg){
-   var
-      systemCfg = require("./lib/requirejs.json"),
-      clientCfg = cfg["requirejs"] || {},
-      clientsPaths = [],
-      result = {};
+var Sailfish = function(config){
+   var self = this;
 
-   clientsPaths = Object.keys(clientCfg["paths"] || {});
+   this.handlers = {};
+   this.app = express();
+   this.config = this._validateConfig(config);
+   this.render = new render(this.config);
+   this.router = new router(this.config);
 
-   extend(true, result, systemCfg, clientCfg);
 
-   //config for client
-   fs.writeFileSync(nodePath.join(path, "main.js"), "requirejs.config("+ JSON.stringify(result, null, 3) +");");
+   this.config["isDevelopment"] = false/*'development' == this.app.get('env')*/;
 
-   //this paths will be faked for working requirejs on server
-   result["fakePaths"] = clientsPaths;
-
-   //prepare config for working on nodejs
-   for (var i in result["paths"]){
-      if (result["paths"].hasOwnProperty(i)){
-         if (clientsPaths.indexOf(i) > -1){
-            if (!/^(\/\/)|(http)/.test(result["paths"][i])){
-               result["paths"][i] = nodePath.resolve(cfg["rootPath"], result["paths"][i]);
-            }
+   if (!this.config["isDevelopment"]){
+      lessCompiler(config["components"], function(err){
+         if (err){
+            throw err;
          }
          else{
-            result["paths"][i] = nodePath.relative(cfg["rootPath"], nodePath.join(__dirname, result["paths"][i]));
+            self._run();
          }
-      }
+      });
    }
-
-   result["baseUrl"] = cfg["rootPath"];
-
-   //config for server
-   fs.writeFileSync(nodePath.join(path, "main-server.js"), "requirejs.config("+ JSON.stringify(result, null, 3) +");");
-}
+   else{
+      self._run();
+   }
+};
 
 /**
- * Validate config and prepare config params
- * @param config
- * @returns {Object}
+ * Add event listener
+ * @param {String} event
+ * @param {Function} fn callback
  */
-function validateConfig(config){
+Sailfish.prototype.on = function(event, fn){
+   var a = [];
+   if (typeof fn == "function"){
+      a = this.handlers[event] = this.handlers[event] || [];
+      a.push(fn);
+   }
+};
 
+/**
+ *
+ * @param config
+ * @returns {*}
+ * @private
+ */
+Sailfish.prototype._validateConfig = function(config){
    function validateAndResolvePath(param){
       if (config[param]){
          config[param] = nodePath.resolve(config["rootPath"], config[param]);
@@ -84,190 +86,116 @@ function validateConfig(config){
    validateAndResolvePath("views");
 
    return config;
-}
+};
 
-/**
- * run handlers
- * @param event
- * @param args
- */
-function notifyEvent(event, args){
-   var a = handlers[event] = handlers[event] || [];
-   a.forEach(function(hdl){
-      hdl.apply(null, args);
-   })
-}
+Sailfish.prototype._run = function(){
+   var self = this;
 
-/**
- * run app
- * @param config
- * @param cb
- */
-function run(config, cb){
-   var
-      controllers = config["controllers"],
-      components  = config["components"],
-      views  = config["views"],
-      sf_client  = nodePath.join(__dirname, "sf_client"),
-      sf_build  = nodePath.join(__dirname, "sf_build"),
-      port  = process.env.PORT || config["port"],
-      appPath = config["rootPath"];
+   this.config["sf_client"] = nodePath.join(__dirname, "sf_client");
+   this.config["sf_build"]  = nodePath.join(__dirname, "sf_build");
 
-   config["sf_client"] = sf_client;
-
-   if(!fs.existsSync(sf_build)){
-      fs.mkdirSync(sf_build);
+   //create folder for js/css packages
+   if(!fs.existsSync(this.config["sf_build"])){
+      fs.mkdirSync(this.config["sf_build"]);
    }
 
-   createRequirejsCfg(sf_client, config);
+   this._prepareRequireJsCfg();
 
-   if (config["favicon"]){
-      app.use(express.favicon(nodePath.resolve(config["rootPath"], config["favicon"])));
+   //provide favicon if defined
+   if (this.config["favicon"]){
+      this.app.use(express.favicon(nodePath.resolve(this.config["rootPath"], this.config["favicon"])));
    }
 
-   if (isDevelopment) {
+   if (this.config["isDevelopment"]) {
       //less middleware
-      app.use('/components', require('less-middleware')({
-         src: components,
+      this.app.use('/components', require('less-middleware')({
+         src: this.config["components"],
          force : true
       }));
    }
    else{
-      app.use('/sf_build', express.static(sf_build));
+      this.app.use('/sf_build', express.static(this.config["sf_build"]));
    }
 
    //static files
-   app.use('/components', express.static(components));
-   app.use('/views', express.static(views));
-   app.use('/sf_client', express.static(sf_client));
+   this.app.use('/components', express.static(this.config["components"]));
+   this.app.use('/views',      express.static(this.config["views"]));
+   this.app.use('/sf_client',  express.static(this.config["sf_client"]));
 
-   domain.run(function(){
+   //render engine
+   this.app.set('views', this.config["views"]);
+   this.app.set('view engine', 'xhtml');
+   this.app.engine('xhtml', this.render.render.bind(this.render));
 
-      process.domain["isDevelopment"] = isDevelopment;
-      process.domain["express"]       = app;
-      process.domain["sfPath"]        = __dirname;
-      process.domain["components"]    = components;
-      process.domain["controllers"]   = controllers;
-      process.domain["views"]         = views;
-      process.domain["sf_client"]     = sf_client;
-      process.domain["sf_build"]      = sf_build;
-      process.domain["appPath"]       = appPath;
+   //routing
+   this.app.all(/\/(?:([^\/]*)\/?)?(?:([^\/]*)\/?)?(.*)?/, this.router.route.bind(this.router));
 
-      //render engine
-      app.set('views', views);
-      app.set('view engine', 'xhtml');
-      app.engine('xhtml', require('./lib/render'));
-
-      //routing
-      app.all(/\/(?:([^\/]*)\/?)?(?:([^\/]*)\/?)?(.*)?/, require('./lib/router.js'));
-
-      //errors handling
-      app.use(function(err, req, res, next) {
-         if (err){
-            notifyEvent("error", [err, req, res]);
-         }
-         else{
-            next();
-         }
-      });
-
-      app.listen(port);
-      console.log("sailfish application running at http://localhost:" + port + " [" + (isDevelopment ? "development" : "production") + " mode]");
-      if (typeof cb == "function"){
-         cb();
-      }
-   });
-}
-
-/**
- * compile all *.less files into path
- * @param {String} path
- * @param cb
- */
-function compileLess(path, cb){
-   var
-      fs = require('fs'),
-      walk = require('walk'),
-      less = require('less'),
-      nodePath = require('path'),
-      parser = new(less.Parser)({
-         paths: [path] // Specify search paths for @import directives
-      }),
-      walker = walk.walk(path);
-
-   walker.on("file", function(root, fileStats, next){
-      if (/\.less$/.test(fileStats.name)){
-         var fullPath = nodePath.join(root, fileStats.name);
-
-         fs.readFile(fullPath, "utf8", function(error, data){
-            if (!error){
-               parser.parse(data, function (e, tree) {
-                  if (!e){
-                     fs.writeFile(fullPath.replace("less", "css"), tree.toCSS(), function(err){
-                        if (!err){
-                           next();
-                        }
-                        else{
-                           throw err;
-                        }
-                     });
-                  }
-                  else{
-                     throw e;
-                  }
-               });
-            }
-            else{
-               throw error;
-            }
-         });
+   //errors handling
+   this.app.use(function(err, req, res, next) {
+      if (err){
+         self._notify("error", [err, req, res]);
       }
       else{
          next();
       }
    });
-   walker.on("end", function(){
-      if (typeof cb === "function"){
-         cb();
-      }
+
+
+   domain.run(function(){
+      //path resolver use process.domain
+      process.domain["componentRelativePath"] = nodePath.relative(self.config["appPath"], self.config["components"]) + "/";
+      process.domain["libRelativePath"]       = nodePath.relative(self.config["appPath"], self.config["sf_client"]) + "/lib/";
+
+      self.app.listen(self.config["port"]);
+      console.log("sailfish application running at http://localhost:" + self.config["sf_client"] + " [" + (self.config["isDevelopment"] ? "development" : "production") + " mode]");
+      self._notify("start");
    });
-}
+};
 
-module.exports = {
-   server : {
-      /**
-       * append event handler
-       * @param event
-       * @param fn
-       */
-      on : function(event, fn){
-         var a = handlers[event] = handlers[event] || [];
-         if (typeof fn == "function"){
-            a.push(fn);
-         }
-      },
-      /**
-       * run application
-       * @param config
-       * @param cb
-       */
-      run : function(config, cb){
-         config = validateConfig(config);
+Sailfish.prototype._prepareRequireJsCfg = function(){
+   var
+      systemCfg = require("./lib/requirejs.json"),
+      clientCfg = this.config["requirejs"] || {},
+      path = this.config["sf_client"],
+      clientsPaths = Object.keys(clientCfg["paths"] || {}),
+      result = {};
 
-         if (!isDevelopment){
-            compileLess(config["components"], function(err){
-               if (err){
-                  throw err;
-               }
-               else{
-                  run(config, cb);
-               }
-            });
+   extend(true, result, systemCfg, clientCfg);
+
+   //config for client
+   fs.writeFileSync(nodePath.join(path, "main.js"), "requirejs.config("+ JSON.stringify(result, null, 3) +");");
+
+   //this paths will be faked for working requirejs on server
+   result["fakePaths"] = clientsPaths;
+
+   //prepare config for working on nodejs
+   for (var i in result["paths"]){
+      if (result["paths"].hasOwnProperty(i)){
+         if (clientsPaths.indexOf(i) > -1){
+            if (!/^(\/\/)|(http)/.test(result["paths"][i])){
+               result["paths"][i] = nodePath.resolve(this.config["rootPath"], result["paths"][i]);
+            }
          }
          else{
-            run(config, cb);
+            result["paths"][i] = nodePath.relative(this.config["rootPath"], nodePath.join(__dirname, result["paths"][i]));
          }
       }
-   },
+   }
+
+   result["baseUrl"] = this.config["rootPath"];
+
+   //config for server
+   fs.writeFileSync(nodePath.join(path, "main-server.js"), "requirejs.config("+ JSON.stringify(result, null, 3) +");");
+};
+
+Sailfish.prototype._notify = function(event, args){
+   var a = this.handlers[event] = this.handlers[event] || [];
+   a.forEach(function(hdl){
+      hdl.apply(null, args);
+   })
+};
+
+module.exports = {
+   Sailfish  : Sailfish,
    Component : require("./lib/Component.js")
 };
