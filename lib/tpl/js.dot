@@ -1,0 +1,10 @@
+<script type="text/javascript" src="/sf_client/ext/requirejs/require.js"></script>
+<script type="text/javascript" src="/sf_client/main.js"></script>
+{{? it.hash }}
+<script type="text/javascript" src="/sf_build/{{=it.hash}}.js"></script>
+{{?}}
+<script type="text/javascript">
+require(["js!core"], function(core){
+  core.bootUp({{=it.dependencies}});
+});
+</script>
