@@ -18,8 +18,6 @@ var Sailfish = function(config){
    this.handlers = {};
    this.app = express();
    this.config = this._validateConfig(config);
-   this.render = new render(this.config);
-   this.router = new router(this.config);
 
    this.config["isDevelopment"] = this.config["isDevelopment"] !== undefined ? this.config["isDevelopment"] : 'development' == this.app.get('env');
    this.config["port"] = this.config["port"] || process.env.PORT;
@@ -100,6 +98,9 @@ Sailfish.prototype._run = function(){
    }
 
    this._prepareRequireJsCfg();
+
+   this.render = new render(this.config);
+   this.router = new router(this.config);
 
    //provide favicon if defined
    if (this.config["favicon"]){
