@@ -1,4 +1,5 @@
 var
+   async = require("async"),
    domain = require('domain').create(),
    express = require('express'),
    nodePath = require('path'),
@@ -9,32 +10,40 @@ var
    router = require("./lib/router");
 
 /**
- * @param config
+ * @param cfg
  * @constructor
  */
-var Sailfish = function(config){
+var Sailfish = function(cfg){
    var self = this;
 
    this.handlers = {};
    this.app = express();
-   this.config = this._validateConfig(config);
 
-   this.config["isDevelopment"] = this.config["isDevelopment"] !== undefined ? this.config["isDevelopment"] : 'development' == this.app.get('env');
-   this.config["port"] = this.config["port"] || process.env.PORT;
+   this._validateConfig(cfg, function(err, config){
+      if (!err){
+         self.config = config;
 
-   if (!this.config["isDevelopment"]){
-      lessCompiler(config["components"], function(err){
-         if (err){
-            throw err;
+         self.config["isDevelopment"] = self.config["isDevelopment"] !== undefined ? self.config["isDevelopment"] : 'development' == self.app.get('env');
+         self.config["port"] = self.config["port"] || process.env.PORT;
+
+         if (!self.config["isDevelopment"]){
+            lessCompiler(config["components"], function(err){
+               if (err){
+                  throw err;
+               }
+               else{
+                  self._run();
+               }
+            });
          }
          else{
             self._run();
          }
-      });
-   }
-   else{
-      self._run();
-   }
+      }
+      else{
+         throw err;
+      }
+   });
 };
 
 /**
@@ -53,37 +62,51 @@ Sailfish.prototype.on = function(event, fn){
 /**
  *
  * @param config
- * @returns {*}
+ * @param cb
  * @private
  */
-Sailfish.prototype._validateConfig = function(config){
-   function validateAndResolvePath(param){
+Sailfish.prototype._validateConfig = function(config, cb){
+   var
+      optionsToValidate = ["components", "controllers", "views"];
+
+   function validateAndResolvePath(param, fn){
       if (config[param]){
          config[param] = nodePath.resolve(config["rootPath"], config[param]);
 
-         if (!fs.existsSync(config[param])){
-            throw new Error(param + " : '" + config[param] + "' not found");
-         }
+         fs.exists(config[param], function(exists){
+            if (exists){
+               fn();
+            }
+            else{
+               fn(new Error(param + " : '" + config[param] + "' not found"));
+            }
+         })
       }
       else{
-         throw new Error("config param '" + param + "' is not defined");
+         fn(new Error("config param '" + param + "' is not defined"));
       }
    }
 
    if (config["rootPath"]){
-      if (!fs.existsSync(config["rootPath"])){
-         throw new Error("rootPath : '" + config["rootPath"] + "' not found");
-      }
+      fs.exists(config["rootPath"], function(exists){
+         if (exists){
+            async.map(optionsToValidate, validateAndResolvePath, function(err){
+               if (!err){
+                  cb(null, config);
+               }
+               else{
+                  cb(err);
+               }
+            });
+         }
+         else{
+            cb(new Error("rootPath : '" + config["rootPath"] + "' not found"));
+         }
+      })
    }
    else{
-      throw new Error("config param 'rootPath' is not defined");
+      cb(new Error("config param 'rootPath' is not defined"));
    }
-
-   validateAndResolvePath("components");
-   validateAndResolvePath("controllers");
-   validateAndResolvePath("views");
-
-   return config;
 };
 
 Sailfish.prototype._run = function(){
@@ -150,6 +173,7 @@ Sailfish.prototype._run = function(){
       self.app.listen(self.config["port"]);
       console.log("sailfish application running at http://localhost:" + self.config["port"] + " [" + (self.config["isDevelopment"] ? "development" : "production") + " mode]");
       self._notify("start");
+
    });
 };
 
