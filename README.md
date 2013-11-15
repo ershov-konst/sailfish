@@ -16,4 +16,7 @@ sailfish - это фремфорк для создания web-приложен�
 css пакеты содержащие в себе модули, необходимые только для запрашиваемой страницы.
 
 ## example
-[Простейший пример использования](https://github.com/ershov-konst/sailfish/tree/master/example)
+[Исходный код сайта доментации sailfish](https://github.com/ershov-konst/sailfish/tree/master/example)
+
+## more info
+[http://sailfish-docs.herokuapp.com/](http://sailfish-docs.herokuapp.com/)
