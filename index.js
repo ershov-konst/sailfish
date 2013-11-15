@@ -10,7 +10,7 @@ var
    router = require("./lib/router");
 
 /**
- * @param cfg
+ * @param {Object} cfg - config
  * @constructor
  */
 var Sailfish = function(cfg){
@@ -23,10 +23,11 @@ var Sailfish = function(cfg){
       if (!err){
          self.config = config;
 
+         //running mode
          self.config["isDevelopment"] = self.config["isDevelopment"] !== undefined ? self.config["isDevelopment"] : 'development' == self.app.get('env');
-         self.config["port"] = self.config["port"] || process.env.PORT;
 
          if (!self.config["isDevelopment"]){
+            //prepare css if current running mode is production
             lessCompiler(config["components"], function(err){
                if (err){
                   throw err;
@@ -60,19 +61,26 @@ Sailfish.prototype.on = function(event, fn){
 };
 
 /**
- *
- * @param config
- * @param cb
+ * validate and resolve paths in configuration
+ * @param {Object} config - appli
+ * @param {Function} cb - callback
  * @private
  */
 Sailfish.prototype._validateConfig = function(config, cb){
    var
-      optionsToValidate = ["components", "controllers", "views"];
+      optionsToValidate = ["components", "controllers", "views"]; //options to check
 
+   /**
+    * validate and resolve required param
+    * @param {String} param - required param
+    * @param {Function} fn - callback
+    */
    function validateAndResolvePath(param, fn){
       if (config[param]){
+         //resolve path if param exists in configuration
          config[param] = nodePath.resolve(config["rootPath"], config[param]);
 
+         //check resolved path on disk
          fs.exists(config[param], function(exists){
             if (exists){
                fn();
@@ -87,9 +95,11 @@ Sailfish.prototype._validateConfig = function(config, cb){
       }
    }
 
+   //rootPath - is required param
    if (config["rootPath"]){
       fs.exists(config["rootPath"], function(exists){
          if (exists){
+            //if exist - continue validation
             async.map(optionsToValidate, validateAndResolvePath, function(err){
                if (!err){
                   cb(null, config);
@@ -109,13 +119,18 @@ Sailfish.prototype._validateConfig = function(config, cb){
    }
 };
 
+/**
+ * prepare environment and start express
+ * @private
+ */
 Sailfish.prototype._run = function(){
    var self = this;
 
+   //path for frontend resources
    this.config["sf_client"] = nodePath.join(__dirname, "sf_client");
+   //path for js/css packages
    this.config["sf_build"]  = nodePath.join(__dirname, "sf_build");
 
-   //create folder for js/css packages
    if(!fs.existsSync(this.config["sf_build"])){
       fs.mkdirSync(this.config["sf_build"]);
    }
@@ -166,17 +181,20 @@ Sailfish.prototype._run = function(){
 
 
    domain.run(function(){
-      //path resolver use process.domain
+      //requirejs module "path-resolver" use process.domain
       process.domain["componentRelativePath"] = nodePath.relative(self.config["rootPath"], self.config["components"]) + "/";
       process.domain["libRelativePath"]       = nodePath.relative(self.config["rootPath"], self.config["sf_client"]) + "/lib/";
 
       self.app.listen(self.config["port"]);
       console.log("sailfish application running at http://localhost:" + self.config["port"] + " [" + (self.config["isDevelopment"] ? "development" : "production") + " mode]");
       self._notify("start");
-
    });
 };
 
+/**
+ * Prepare main.js for server-side and client-side
+ * @private
+ */
 Sailfish.prototype._prepareRequireJsCfg = function(){
    var
       systemCfg = require("./lib/requirejs.json"),
@@ -187,7 +205,7 @@ Sailfish.prototype._prepareRequireJsCfg = function(){
 
    extend(true, result, systemCfg, clientCfg);
 
-   //config for client
+   //save config for client
    fs.writeFileSync(nodePath.join(path, "main.js"), "requirejs.config("+ JSON.stringify(result, null, 3) +");");
 
    //this paths will be faked for working requirejs on server
@@ -209,10 +227,16 @@ Sailfish.prototype._prepareRequireJsCfg = function(){
 
    result["baseUrl"] = this.config["rootPath"];
 
-   //config for server
+   //save config for server
    fs.writeFileSync(nodePath.join(path, "main-server.js"), "requirejs.config("+ JSON.stringify(result, null, 3) +");");
 };
 
+/**
+ * Notify about event
+ * @param event
+ * @param args
+ * @private
+ */
 Sailfish.prototype._notify = function(event, args){
    var a = this.handlers[event] = this.handlers[event] || [];
    a.forEach(function(hdl){
