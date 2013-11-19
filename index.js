@@ -62,7 +62,7 @@ Sailfish.prototype.on = function(event, fn){
 
 /**
  * validate and resolve paths in configuration
- * @param {Object} config - appli
+ * @param {Object} config - application cfg
  * @param {Function} cb - callback
  * @private
  */
