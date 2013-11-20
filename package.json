@@ -1,16 +1,31 @@
 {
-   "name": "sailfish",
-   "version": "0.0.1",
-   "main" : "./index.js",
-   "dependencies" : {
-      "walk" : "latest",
-      "tensor-xmldom" : "latest",
-      "async" : "latest",
-      "node.extend" : "latest",
-      "express"  : "latest",
-      "dot" : "latest",
-      "requirejs" : "latest",
-      "less-middleware" : "latest",
-      "less" : "latest"
-   }
+    "name": "sailfish",
+    "version": "0.0.1",
+    "main": "./index.js",
+    "dependencies": {
+        "walk": "2.2.x",
+        "tensor-xmldom": "0.1.x",
+        "async": "0.2.x",
+        "node.extend": "0.2.x",
+        "express": "3.4.x",
+        "dot": "1.0.x",
+        "requirejs": "2.1.9",
+        "less-middleware": "0.1.x",
+        "less": "1.5.x"
+    },
+    "description": "sailfish - это фремфорк для создания web-приложений на JavaScript. Фреймворк является самодостаточным, т.е содержит в себе как серверную так и клиентскую части.",
+    "devDependencies": {},
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ershov-konst/sailfish"
+    },
+    "author": "Konstantin Ershov",
+    "license": "BSD-2-Clause",
+    "bugs": {
+        "url": "https://github.com/ershov-konst/sailfish/issues"
+    },
+    "homepage": "https://github.com/ershov-konst/sailfish"
 }
