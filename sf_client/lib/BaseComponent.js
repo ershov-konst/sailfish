@@ -152,8 +152,9 @@ define("js!BaseComponent", ["js!core", "js!Abstract"], function(core, Abstract){
 
             try{
                obj = (typeof cfg.getAttribute === "function")
-                  ? JSON.parse(cfg.getAttribute("config") || '{}')
+                  ? JSON.parse(decodeURIComponent(cfg.getAttribute("config") || '{}'))
                   : {};
+               cfg.removeAttribute('config');
             }
             catch(e){
                throw new Error("Ошибка разбор конфигурации для компонента");
