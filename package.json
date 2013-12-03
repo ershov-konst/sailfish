@@ -1,6 +1,6 @@
 {
     "name": "sailfish",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "main": "./index.js",
     "dependencies": {
         "walk": "2.2.x",
