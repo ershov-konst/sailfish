@@ -1,4 +1,4 @@
-define("js!CompoundComponent", ["js!core", "js!BaseComponent"], function(core, BaseComponent){
+define("js!CompoundComponent", ["js!utils", "js!BaseComponent"], function(core, BaseComponent){
 
    return BaseComponent.extend({
       init : function(cfg){

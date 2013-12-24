@@ -1,4 +1,4 @@
-define("js!core", function(){
+define("js!utils", function(){
    var core;
    return core = {
       provideInnerElements : function(root){

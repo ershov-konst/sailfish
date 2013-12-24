@@ -1,4 +1,4 @@
-define("js!Class", ["js!core"], function (core) {
+define("js!Class", ["js!utils"], function (core) {
    /* Simple JavaScript Inheritance
     * By John Resig http://ejohn.org/
     * MIT Licensed.
