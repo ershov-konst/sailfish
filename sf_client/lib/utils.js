@@ -9,23 +9,25 @@ define("js!utils", function(){
    /**
     * Provide inner components
     * @param {HTMLElement} root that may contains components
+    * @param {String} [parentId] id of parent container
     * @returns {Array} array of instantiated components
     */
-   utils.provideInnerComponents = function(root){
+   utils.provideInnerComponents = function(root, parentId){
       var
          collection,
          result = [];
 
-      function _getCollection (root){
+      function _getCollection (root, parentId){
          var
-            components = root.querySelectorAll("[data-component]"),
+            selector = parentId ? '[data-component][data-pid="'+ parentId +'"]' : '[data-component]',
+            components = root.querySelectorAll(selector),
             deadCollection = [];
 
          for (var i = 0, l = components.length; i < l; i++){
-            if (components[i].localName == "component"){
-               deadCollection.push(components[i]);
+            if (parentId){
+               result.push(components[i]);
             }
-            else{
+            else {
                var p = components[i];
                while(p = p.parentNode){
                   if (p === root){
@@ -42,7 +44,7 @@ define("js!utils", function(){
          return deadCollection;
       }
 
-      collection = _getCollection(root);
+      collection = _getCollection(root, parentId);
 
       for (var i = 0, l = collection.length; i < l; i++){
          var cName = collection[i].getAttribute("data-component");
@@ -63,6 +65,7 @@ define("js!utils", function(){
    };
 
    /**
+    * Like a jQuery merge
     * Merge the contents of two or more objects together into the first object
     * @param {Boolean} [deep] If true, the merge becomes recursive (aka. deep copy)
     * @param {Object} target The object to extend. It will receive the new properties.
@@ -191,4 +194,11 @@ define("js!utils", function(){
 
       return _type;
    };
+   /**
+    * Generate an random id
+    * @returns {string}
+    */
+   utils.generateId = function(){
+      return Math.random().toString(36).substring(7);
+   }
 });
