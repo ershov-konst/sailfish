@@ -8,7 +8,7 @@ define(function(){
             path.push(process.domain["componentRelativePath"]);
          }
          else{
-            path.push("/components/");
+            path.push(config.baseUrl + "components/");
          }
 
          if (name.indexOf("/") == -1){
@@ -24,7 +24,7 @@ define(function(){
             path.push(process.domain["libRelativePath"]);
          }
          else{
-            path.push("/sf_client/lib/")
+            path.push(config.baseUrl + "sf_client/lib/")
          }
       }
 
