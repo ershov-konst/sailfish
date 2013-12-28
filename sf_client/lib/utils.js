@@ -200,5 +200,7 @@ define("js!utils", function(){
     */
    utils.generateId = function(){
       return Math.random().toString(36).substring(7);
-   }
+   };
+
+   return utils;
 });
