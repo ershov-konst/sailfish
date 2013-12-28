@@ -1,4 +1,4 @@
-define("js!BaseComponent", ["js!utils", "js!Abstract"], function(core, Abstract){
+define("js!BaseComponent", ["js!utils", "js!Abstract"], function(utils, Abstract){
 
    return Abstract.extend({
       _dotTplFn : null,
@@ -19,7 +19,7 @@ define("js!BaseComponent", ["js!utils", "js!Abstract"], function(core, Abstract)
          }
 
          this._container.removeAttribute("config");
-         this._container.setAttribute("id", this._id = this._generateId());
+         this._container.setAttribute("id", this._id = utils.generateId());
       },
       container : function(){
          return this._container;
@@ -68,7 +68,7 @@ define("js!BaseComponent", ["js!utils", "js!Abstract"], function(core, Abstract)
          var
             res = {},
             parsed = this._parseMarkup(cfg);
-         core.extend(true, res, options, parsed);
+         utils.extend(true, res, options, parsed);
          return res;
       },
       _parseMarkup : function(cfg){
