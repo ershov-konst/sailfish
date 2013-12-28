@@ -1,4 +1,4 @@
-# sailfish [![Build Status](https://travis-ci.org/ershov-konst/sailfish.png)](https://travis-ci.org/ershov-konst/sailfish)
+# sailfish [![Build Status](https://travis-ci.org/ershov-konst/sailfish.png)](https://travis-ci.org/ershov-konst/sailfish) [![Dependency Status](https://david-dm.org/ershov-konst/sailfish.png?theme=shields.io)](https://david-dm.org/ershov-konst/sailfish) [![devDependency Status](https://david-dm.org/ershov-konst/sailfish/dev-status.png?theme=shields.io)](https://david-dm.org/ershov-konst/sailfish#info=devDependencies)
 
 sailfish - это фремфорк для создания web-приложений на JavaScript. Фреймворк является самодостаточным,
 т.е содержит в себе как серверную так и клиентскую части.
