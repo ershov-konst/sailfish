@@ -181,18 +181,33 @@ define("js!utils", function(){
     * @return {String}
     */
    utils.type = function(o){
-      if (o && o.nodeType === 1){
+      // handle null in old IE
+      if (o === null) {
+         return 'null';
+      }
+      if (o === undefined){
+         return 'undefined';
+      }
+
+      // handle DOM elements
+      if (o && (o.nodeType === 1 || o.nodeType === 9)) {
          return 'element';
       }
 
-      var match = Object.prototype.toString.call(o).match(/\[object (.*?)\]/);
-      var _type = match[1].toLowerCase();
+      var s = Object.prototype.toString.call(o);
+      var type = s.match(/\[object (.*?)\]/)[1].toLowerCase();
 
-      if (_type === 'number' && isNaN(o)){
-         return 'nan';
+      // handle NaN and Infinity
+      if (type === 'number') {
+         if (isNaN(o)) {
+            return 'nan';
+         }
+         if (!isFinite(o)) {
+            return 'infinity';
+         }
       }
 
-      return _type;
+      return type;
    };
    /**
     * Generate an random id
