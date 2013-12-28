@@ -1,4 +1,4 @@
-# sailfish
+# sailfish [![Build Status](https://travis-ci.org/ershov-konst/sailfish.png)](https://travis-ci.org/ershov-konst/sailfish)
 
 sailfish - это фремфорк для создания web-приложений на JavaScript. Фреймворк является самодостаточным,
 т.е содержит в себе как серверную так и клиентскую части.
