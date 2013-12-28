@@ -1,8 +1,8 @@
 define(['js!utils'], function(utils){
 
-   describe('utils.type', function() {
+   describe('utils', function() {
 
-      it('string', function() {
+      it('utils.type', function() {
          var
             res = [],
             types = {
