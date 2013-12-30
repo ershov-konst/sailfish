@@ -1,9 +1,9 @@
-/**
- * js!utils
- *
- * Basic tools for working framework
- */
 define("js!utils", function(){
+   /**
+    * js!utils
+    * Basic tools for working framework
+    * @namespace {Object} utils
+    */
    var utils = {};
 
    /**
@@ -11,6 +11,7 @@ define("js!utils", function(){
     * @param {HTMLElement} root that may contains components
     * @param {String} [parentId] id of parent container
     * @returns {Array} array of instantiated components
+    * @memberof utils
     */
    utils.provideInnerComponents = function(root, parentId){
       var
@@ -57,6 +58,7 @@ define("js!utils", function(){
    /**
     * main method for run application
     * @param {Array} deps dependencies for start application
+    * @memberof utils
     */
    utils.bootUp = function(deps){
       require(deps, function(){
@@ -72,6 +74,7 @@ define("js!utils", function(){
     * @param {Object} object1 An object containing additional properties to merge in
     * @param {Object} [objectN] Additional objects containing properties to merge in.
     * @returns {Object}
+    * @memberof utils
     */
    utils.extend = function() {
       var options, name, src, copy, copyIsArray, clone,
@@ -79,7 +82,7 @@ define("js!utils", function(){
          i = 1,
          length = arguments.length,
          deep = false,
-         //helper which replicates the jquery internal functions
+      //helper which replicates the jquery internal functions
          objectHelper = {
             hasOwn: Object.prototype.hasOwnProperty,
             class2type: {},
@@ -179,6 +182,10 @@ define("js!utils", function(){
     * type checking by Jon Bretman
     * @param {*} o
     * @return {String}
+    * @memberof utils
+    * @example
+    *
+    *     utils.type('str') //returns 'string'
     */
    utils.type = function(o){
       // handle null in old IE
@@ -212,6 +219,7 @@ define("js!utils", function(){
    /**
     * Generate an random id
     * @returns {string}
+    * @memberof utils
     */
    utils.generateId = function(){
       return Math.random().toString(36).substring(7);
