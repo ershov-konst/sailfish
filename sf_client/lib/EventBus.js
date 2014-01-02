@@ -1,8 +1,13 @@
+/**
+ * @module js!EventBus
+ */
 define("js!EventBus", function(){
    /**
-    * Simple event object
-    * @param {String} type Name of event
+    * @class
+    * @classdesc Simple event object
+    * @alias EventObject
     * @constructor
+    * @param {String} type Name of event
     */
    var EventObject = function(type){
       this.type = type;
@@ -25,8 +30,9 @@ define("js!EventBus", function(){
    };
 
    /**
-    * Publish/subscribe API
-    * @class EventBusChannel
+    * @class
+    * @classdesc Publish/subscribe API
+    * @alias EventBusChannel
     * @constructor
     */
    var EventBusChannel = function() {
@@ -123,8 +129,9 @@ define("js!EventBus", function(){
    };
 
    /**
-    * Manager for easy work with instances of the EventBusChannel
     * @class
+    * @classdesc Manager for easy work with instances of the EventBusChannel
+    * @alias module:js!EventBus
     * @constructor
     */
    var EventBus = function(){
