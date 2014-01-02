@@ -1,106 +1,153 @@
 define("js!EventBus", function(){
+   /**
+    * Simple event object
+    * @param {String} type Name of event
+    * @constructor
+    */
+   var EventObject = function(type){
+      this.type = type;
+      this.propagation = true;
+   };
 
-   var EventBusClass = function() {
+   /**
+    * Prevents the event to next handlers
+    */
+   EventObject.prototype.stopPropagation = function(){
+      this.propagation = false;
+   };
+
+   /**
+    * Returns whether eventObject.stopPropagation() was ever called on this event object
+    * @returns {boolean}
+    */
+   EventObject.prototype.isPropagationStopped = function(){
+      return !this.propagation;
+   };
+
+   /**
+    * Publish/subscribe API
+    * @class EventBusChannel
+    * @constructor
+    */
+   var EventBusChannel = function() {
       this.listeners = {};
    };
 
-   EventBusClass.prototype = {
-      on :function(eventName, callback, scope) {
-         var args = [];
-         var numOfArgs = arguments.length;
-         for(var i=0; i<numOfArgs; i++){
-            args.push(arguments[i]);
-         }
-         args = args.length > 3 ? args.splice(3, args.length-1) : [];
-         if(typeof this.listeners[eventName] != "undefined") {
-            this.listeners[eventName].push({scope:scope, callback:callback, args:args});
-         } else {
-            this.listeners[eventName] = [{scope:scope, callback:callback, args:args}];
-         }
-      },
-      off :function(eventName, callback, scope) {
-         if(typeof this.listeners[eventName] != "undefined") {
-            var numOfCallbacks = this.listeners[eventName].length;
-            var newArray = [];
-            for(var i=0; i<numOfCallbacks; i++) {
-               var listener = this.listeners[eventName][i];
-               if(listener.scope == scope && listener.callback == callback) {
+   /**
+    * Subscribe to an event
+    * @param {String} type Name of event to subscribe
+    * @param {Function} handler A function to execute when the event is triggered
+    * @param [ctx] The value to be passed as the this parameter to the handler
+    */
+   EventBusChannel.prototype.on = function(type, handler, ctx) {
+      this.listeners[type] = this.listeners[type] || [];
 
-               } else {
-                  newArray.push(listener);
-               }
-            }
-            this.listeners[eventName] = newArray;
-         }
-      },
-      has :function(eventName, callback, scope) {
-         if(typeof this.listeners[eventName] != "undefined") {
-            var numOfCallbacks = this.listeners[eventName].length;
-            if(callback === undefined && scope === undefined){
-               return numOfCallbacks > 0;
-            }
-            for(var i=0; i<numOfCallbacks; i++) {
-               var listener = this.listeners[eventName][i];
-               if(listener.scope == scope && listener.callback == callback) {
-                  return true;
-               }
-            }
-         }
-         return false;
-      },
-      trigger :function(eventName, data) {
-         var numOfListeners = 0;
-         var event = {
-            type:eventName,
-            target:data
-         };
-         var args = [];
-         var numOfArgs = arguments.length;
-         for(var i=0; i<numOfArgs; i++){
-            args.push(arguments[i]);
-         }
-         args = args.length > 2 ? args.splice(2, args.length-1) : [];
-         args = [event].concat(args);
-         if(typeof this.listeners[eventName] != "undefined") {
-            var numOfCallbacks = this.listeners[eventName].length;
-            for(var j=0; j<numOfCallbacks; j++) {
-               var listener = this.listeners[eventName][j];
-               if(listener && listener.callback) {
-                  var concatArgs = args.concat(listener.args);
-                  listener.callback.apply(listener.scope, concatArgs);
-                  numOfListeners += 1;
-               }
+      this.listeners[type].push({
+         ctx: ctx || window,
+         handler: handler
+      })
+   };
+
+   /**
+    * Unsubscribe to event with specified name
+    * @param {String} type Name of event for unsubscribing
+    * @param {Function} handler Handler for unsubscribing
+    * @param [ctx] context
+    */
+   EventBusChannel.prototype.off = function(type, handler, ctx) {
+      var listener;
+      if (this.listeners[type]){
+         for (var i = 0, l = this.listeners[type].length; i < l; i++){
+            listener = this.listeners[type][i];
+            if (listener.handler == handler && listener.ctx == (ctx || window)){
+               this.listeners[type].splice(i, 1);
+               break;
             }
          }
-      },
-      getEvents:function() {
-         var str = "";
-         for(var type in this.listeners) {
-            if (this.listeners.hasOwnProperty(type)){
-               var numOfCallbacks = this.listeners[type].length;
-               for(var i=0; i<numOfCallbacks; i++) {
-                  var listener = this.listeners[type][i];
-                  str += listener.scope && listener.scope.className ? listener.scope.className : "anonymous";
-                  str += " listen for '" + type + "'\n";
-               }
-            }
-         }
-         return str;
       }
    };
 
+   /**
+    * Determine whether the specified handler subscribed with the specified context for the event with the specified name
+    * @param {String} type Name of event
+    * @param {Function} handler A function to execute when the event is triggered
+    * @param [ctx]
+    * @returns {boolean}
+    */
+   EventBusChannel.prototype.has = function(type, handler, ctx) {
+      var listener;
+      if (this.listeners[type]){
+         for (var i = 0, l = this.listeners[type].length; i < l; i++){
+            listener = this.listeners[type][i];
+            if (listener.handler == handler && listener.ctx == (ctx || window)){
+               return true;
+            }
+         }
+      }
+      return false;
+   };
 
-   var AdvancedEventBus = function(){
+   /**
+    * Execute all handlers that subscribe to an event with specified name
+    * @param {String} type Name of event
+    * @param {*} [arg]
+    */
+   EventBusChannel.prototype.trigger = function(type, arg) {
+      var
+         funcArgs = Array.prototype.concat.apply([], arguments),
+         event = new EventObject(type),
+         args = [event].concat(funcArgs.slice(1)),
+         listener;
+
+      if (this.listeners[type]){
+         for (var i = 0, l = this.listeners[type].length; i < l; i++){
+            listener = this.listeners[type][i];
+            if (event.isPropagationStopped()){
+               break;
+            }
+            if (listener && typeof listener.handler == 'function'){
+               if (listener.handler.apply(listener.ctx, args) === false){
+                  event.stopPropagation();
+               }
+            }
+         }
+      }
+   };
+   /**
+    * Returns all handler subscribed to event with specified name
+    * @param {String} type Name of event
+    * @returns {*}
+    */
+   EventBusChannel.prototype.getHandlers = function(type) {
+      return this.listeners[type];
+   };
+
+   /**
+    * Manager for easy work with instances of the EventBusChannel
+    * @class
+    * @constructor
+    */
+   var EventBus = function(){
       this._channels = {};
    };
 
-   AdvancedEventBus.prototype.channel = function(name){
-      this._channels[name] = this._channels[name] || new EventBusClass();
+   /**
+    * Сreates (if not exists) and returns an instance of the EventBusChannel
+    * @param {String} name name of requested EventBusChannel
+    * @returns {EventBusChannel}
+    */
+   EventBus.prototype.channel = function(name){
+      this._channels[name] = this._channels[name] || new EventBusChannel();
       return this._channels[name];
    };
 
-   AdvancedEventBus.prototype.removeChannel = function(name){
+   /**
+    * Remove EventBusChannel with specified name
+    * @param {String} name name of EventBusChannel
+    */
+   EventBus.prototype.removeChannel = function(name){
       delete this._channels[name];
    };
-   return new AdvancedEventBus();
+
+   return new EventBus();
 });
