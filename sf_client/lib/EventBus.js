@@ -131,7 +131,8 @@ define("js!EventBus", function(){
    /**
     * @class
     * @classdesc Manager for easy work with instances of the EventBusChannel
-    * @alias module:js!EventBus
+    * **Module returns:** js!EventBus
+    * @alias EventBus
     * @constructor
     */
    var EventBus = function(){

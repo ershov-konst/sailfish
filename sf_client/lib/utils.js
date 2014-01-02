@@ -1,7 +1,10 @@
+/**
+ * @module js!utils
+ */
 define("js!utils", function(){
    /**
-    * js!utils
     * Basic tools for working framework
+    * **Module returns**: js!utils
     * @namespace {Object} utils
     */
    var utils = {};
