@@ -43,7 +43,7 @@ define("js!EventBus", function(){
     * Subscribe to an event
     * @param {String} type Name of event to subscribe
     * @param {Function} handler A function to execute when the event is triggered
-    * @param [ctx] The value to be passed as the this parameter to the handler
+    * @param {Object} [ctx] The value to be passed as the this parameter to the handler
     */
    EventBusChannel.prototype.on = function(type, handler, ctx) {
       this.listeners[type] = this.listeners[type] || [];
@@ -58,7 +58,7 @@ define("js!EventBus", function(){
     * Unsubscribe to event with specified name
     * @param {String} type Name of event for unsubscribing
     * @param {Function} handler Handler for unsubscribing
-    * @param [ctx] context
+    * @param {Object} [ctx] context The value to be passed as the this parameter to the handler
     */
    EventBusChannel.prototype.off = function(type, handler, ctx) {
       var listener;
@@ -77,7 +77,7 @@ define("js!EventBus", function(){
     * Determine whether the specified handler subscribed with the specified context for the event with the specified name
     * @param {String} type Name of event
     * @param {Function} handler A function to execute when the event is triggered
-    * @param [ctx]
+    * @param {Object} [ctx] The value to be passed as the this parameter to the handler
     * @returns {boolean}
     */
    EventBusChannel.prototype.has = function(type, handler, ctx) {
@@ -131,7 +131,8 @@ define("js!EventBus", function(){
    /**
     * @class
     * @classdesc Manager for easy work with instances of the EventBusChannel
-    * **Module returns:** js!EventBus
+    *
+    * **Module returns:** `js!EventBus`
     * @alias EventBus
     * @constructor
     */

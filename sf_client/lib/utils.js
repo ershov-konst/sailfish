@@ -4,16 +4,17 @@
 define("js!utils", function(){
    /**
     * Basic tools for working framework
-    * **Module returns**: js!utils
+    *
+    * **Module returns**: `js!utils`
     * @namespace {Object} utils
     */
    var utils = {};
 
    /**
-    * Provide inner components
-    * @param {HTMLElement} root that may contains components
-    * @param {String} [parentId] id of parent container
-    * @returns {Array} array of instantiated components
+    * Provide inner components, returns array of instantiated components
+    * @param {HTMLElement} root Element that may contains components
+    * @param {String} [parentId] Id of parent container
+    * @returns {Array}
     * @memberof utils
     */
    utils.provideInnerComponents = function(root, parentId){
