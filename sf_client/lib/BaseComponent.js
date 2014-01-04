@@ -150,19 +150,11 @@ define("js!BaseComponent", ["js!utils", "js!Abstract"], function(utils, Abstract
          if (cfg && typeof cfg.cloneNode === "function"){
             var obj, childNodes;
 
-            try{
-               obj = (typeof cfg.getAttribute === "function")
-                  ? JSON.parse(decodeURIComponent(cfg.getAttribute("config") || '{}'))
-                  : {};
-               cfg.removeAttribute('config');
-            }
-            catch(e){
-               throw new Error("Ошибка разбор конфигурации для компонента");
-            }
+            obj = (typeof cfg.getAttribute === "function") ? this._decodeConfig(cfg.getAttribute('config') || '{}') : {};
+            cfg.removeAttribute('config');
 
             obj.name = ((typeof cfg.getAttribute === "function") ? cfg.getAttribute("name") : null)
                || obj.name || "";
-            //cfg = obj;
 
             childNodes = cfg.childNodes;
 
@@ -183,6 +175,17 @@ define("js!BaseComponent", ["js!utils", "js!Abstract"], function(utils, Abstract
          }
 
          return obj;
+      },
+      _decodeConfig: function(encodedCfg){
+         var result;
+
+         try{
+            result = JSON.parse(decodeURIComponent(encodedCfg.replace(/&quot;|"/g,'\'')));
+         }
+         catch(e){
+            throw new Error("Ошибка разбор конфигурации для компонента");
+         }
+         return result;
       },
       destroy : function(){
          this._removeContainer();
