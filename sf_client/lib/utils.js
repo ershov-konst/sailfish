@@ -122,6 +122,18 @@ define("js!utils", function(){
       return result;
    }
 
+   function decodeConfig(encodedCfg){
+      var result;
+
+      try{
+         result = JSON.parse(decodeURIComponent(encodedCfg.replace(/&quot;|"/g,'\'')));
+      }
+      catch(e){
+         throw new Error("Ошибка разбор конфигурации для компонента");
+      }
+      return result;
+   }
+
 
 
    /**
@@ -364,7 +376,7 @@ define("js!utils", function(){
             childNodes;
 
          try{
-            obj = cfg.getAttribute ? JSON.parse(cfg.getAttribute('config') || '{}') : {};
+            obj = cfg.getAttribute ? decodeConfig(cfg.getAttribute('config') || '{}') : {};
          }
          catch(e){
             throw new Error('Ошибка разбора конфигурации компонента!');

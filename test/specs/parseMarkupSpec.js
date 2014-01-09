@@ -159,6 +159,32 @@ define(['js!utils'], function(utils){
          });
       });
 
+      it('parseMarkup.parseAttr', function() {
+         var
+            element = document.createElement('component'),
+            cfg = {
+               'name': 'john',
+               'foo' : 'bar',
+               'num' : 42,
+               'html': '<a href="/">that link contains \'quot\' and "double quot"</a>',
+               'html2': "<a href='/'>that link contains 'quot' and \"double quot\"</a>"
+            },
+            res;
+
+         element.setAttribute('config', encodeURIComponent(JSON.stringify(cfg)).replace(/'/g, '&quot;'));
+
+         res = utils.parseMarkup(element);
+         delete res.element;
+
+         expect(res).toEqual({
+            'name': 'john',
+            'foo' : 'bar',
+            'num' : 42,
+            'html': '<a href="/">that link contains \'quot\' and "double quot"</a>',
+            'html2': "<a href='/'>that link contains 'quot' and \"double quot\"</a>"
+         });
+      });
+
    });
 
 });
