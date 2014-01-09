@@ -379,7 +379,7 @@ define("js!utils", function(){
             obj = cfg.getAttribute ? decodeConfig(cfg.getAttribute('config') || '{}') : {};
          }
          catch(e){
-            throw new Error('Ошибка разбора конфигурации компонента!');
+            throw new Error('parseMarkup: parse error!');
          }
 
          obj.name = (cfg.getAttribute ? cfg.getAttribute('name') : null)
