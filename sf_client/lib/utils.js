@@ -2,6 +2,128 @@
  * @module js!utils
  */
 define("js!utils", function(){
+
+   function getTagName(elem) {
+      //IE8 DOM localName is undefined, checking nodeName instead.
+      return elem.localName || (elem.nodeName && elem.nodeName.toLowerCase());
+   }
+
+
+   function getChildNodes(elem){
+      var doc = null;
+      if (elem.innerHTML && typeof window !== 'undefined' && window.ActiveXObject){
+         doc = new ActiveXObject('Microsoft.XMLDOM');
+         doc.async = false;
+         doc.loadXML('<doc>' + elem.innerHTML + '</doc>');
+         doc = doc.documentElement;
+      }
+      else{
+         doc = elem;
+      }
+      if (!doc){
+         throw new Error('Ошибка разбора конфигурации компонента! Configuration:\n' + elem.innerHTML);
+      }
+      return doc.childNodes;
+   }
+
+   function resolveType(value){
+
+      if (stringIsNumber(value)){
+         value = parseFloat(value, 10);
+      }
+
+      switch (value){
+         case 'false':
+            value = false;
+            break;
+         case 'true':
+            value = true;
+            break;
+         case 'null':
+            value = null;
+            break;
+         case 'undefined':
+            value = undefined;
+            break;
+         default:
+            break;
+      }
+      return value;
+   }
+
+   function stringIsNumber(n) {
+      return !isNaN(parseFloat(n)) && isFinite(n);
+   }
+
+
+   function parseElem(elem){
+      var result;
+
+      if (elem.nodeType === 3){ //TEXT_NODE
+         //если это любой непробельный символ - считаем, что это часть контента, иначе скорее всего перевод строки - пропускаем
+         result = /\S/.test(elem.textContent) ? {name : 'content', value : elem.textContent} : false;
+      }
+      else if (getTagName(elem) == 'o') {
+         if (/Object|object|Array|array/.test(elem.getAttribute('type'))){
+            var
+               isArray = /Array|array/.test(elem.getAttribute('type')),
+               res = isArray ? [] : {},
+               childRes,
+               childNodes = elem.childNodes;
+
+            if (!isArray && !childNodes.length){
+               for (var aI = 0, attrs = elem.attributes, aL = attrs.length; aI < aL; aI++){
+                  res[attrs[aI].name] = resolveType(attrs[aI].value);
+               }
+            }
+
+            for (var i = 0, l = childNodes.length; i < l; i++){
+               if ((childRes = parseElem(childNodes[i])) !== false){
+                  if (isArray){
+                     res.push(childRes.value);
+                  }
+                  else{
+                     if(childRes.name == 'content' && res.content){
+                        res.content += childRes.value;
+                     }
+                     else{
+                        res[childRes.name] = childRes.value;
+                     }
+                  }
+               }
+            }
+
+            result =  {
+               'name' : elem.getAttribute('name') || 'Object',
+               'value': res
+            }
+         }
+         else{
+            var
+               obj = {},
+               content = elem.innerHTML || elem.text || "";
+
+            obj.name = elem.getAttribute('name');
+            obj.value= elem.getAttribute('value');
+
+            if (content.length){
+               obj.value = content.replace(/^\s+|\s+$/g, "");
+            }
+
+            obj.value = resolveType(obj.value);
+
+            result = obj;
+         }
+      }
+      else if ('outerHTML' in elem){
+         result = {name : "content", value : elem.outerHTML};
+      }
+
+      return result;
+   }
+
+
+
    /**
     * Basic tools for working framework
     *
@@ -227,6 +349,52 @@ define("js!utils", function(){
     */
    utils.generateId = function(){
       return Math.random().toString(36).substring(7);
+   };
+
+   /**
+    * Parse configuration from html element declaration
+    * @param {HTMLElement} cfg HTMLElement contained config declared by html
+    * @returns {Object}
+    */
+   utils.parseMarkup = function(cfg){
+
+      if (cfg && cfg.cloneNode){ // Bugfix. IE8 type of DOM elements functions == "object".
+         var
+            obj,
+            childNodes;
+
+         try{
+            obj = cfg.getAttribute ? JSON.parse(cfg.getAttribute('config') || '{}') : {};
+         }
+         catch(e){
+            throw new Error('Ошибка разбора конфигурации компонента!');
+         }
+
+         obj.name = (cfg.getAttribute ? cfg.getAttribute('name') : null)
+            || obj.name || '';
+         obj.element = cfg;
+         cfg = obj;
+
+         if (cfg.element.getAttribute('hasMarkup') !== 'true'){
+            childNodes = getChildNodes(cfg.element);
+            if (childNodes.length){
+               for (var i = 0, l = childNodes.length; i < l; i++){
+                  var field = parseElem(childNodes[i]);
+                  if (field){
+                     if (field.name == 'content'){
+                        cfg.content = cfg.content || '';
+                        cfg.content += field.value;
+                     }
+                     else{
+                        cfg[field.name] = field.value;
+                     }
+                  }
+               }
+            }
+         }
+      }
+
+      return obj;
    };
 
    return utils;
