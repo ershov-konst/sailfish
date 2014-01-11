@@ -1,13 +1,12 @@
 {
     "name": "sailfish",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "main": "./index.js",
     "dependencies": {
         "walk": "2.2.x",
         "tensor-xmldom": "0.1.x",
         "async": "0.2.x",
         "node.extend": "1.0.x",
-        "express": "3.4.x",
         "dot": "1.0.x",
         "requirejs": "2.1.9",
         "less-middleware": "0.1.x",
