@@ -20,7 +20,6 @@ var Sailfish = function(cfg){
    this.req = undefined;
    this.app = express();
 
-   this.handlers = {};
    this.config = this._validateConfigSync(cfg);
 
    this._run();
@@ -34,19 +33,6 @@ var Sailfish = function(cfg){
     }
     });
     }*/
-};
-
-/**
- * Add event listener
- * @param {String} event
- * @param {Function} fn callback
- */
-Sailfish.prototype.on = function(event, fn){
-   var a = [];
-   if (typeof fn == "function"){
-      a = this.handlers[event] = this.handlers[event] || [];
-      a.push(fn);
-   }
 };
 
 /**
@@ -79,9 +65,11 @@ Sailfish.prototype._validateConfigSync = function(config){
 
    if (fs.existsSync(config["rootPath"])){
       //if exist - continue validation
-      optionsToValidate.forEach(function(param){
-         validateAndResolvePath(param);
-      });
+      for (var param in optionsToValidate){
+         if (optionsToValidate.hasOwnProperty(param)){
+            validateAndResolvePath(param)
+         }
+      }
    }
    else{
       throw new Error("rootPath : '" + config["rootPath"] + "' not found");
@@ -109,12 +97,12 @@ Sailfish.prototype._run = function(){
    this.requirejsCfg = this._prepareRequireJsCfg();
    this.requirejs = this._prepareRequirejsCtx();
 
-   this.render = new render(this.config);
+   this.render = new render(this.config, this.requirejs);
    this.router = new router(this.config);
 
    //prepare domain
    this.app.use(function(req, res, next){
-      domain().run(function(){
+      domain.createDomain().run(function(){
          //requirejs module "path-resolver" use process.domain
          process.domain["componentRelativePath"] = nodePath.relative(self.config["rootPath"], self.config["components"]) + "/";
          process.domain["libRelativePath"]       = nodePath.relative(self.config["rootPath"], self.config["sf_client"]) + "/lib/";
@@ -189,31 +177,27 @@ Sailfish.prototype._prepareRequireJsCfg = function(){
    return result;
 };
 
+/**
+ * retrurns local requirejs
+ * @returns {*}
+ * @private
+ */
 Sailfish.prototype._prepareRequirejsCtx = function(){
-   var requirejs = requirejs.config(this.requirejsCfg);
+   var req = requirejs.config(this.requirejsCfg);
 
    this.requirejsCfg["fakePaths"].forEach(function(toFake){
-      requirejs.define.apply(requirejs, [toFake, function(){}]);
+      requirejs.define.apply(req, [toFake, function(){}]);
    });
 
-   return requirejs;
-};
-
-Sailfish.prototype.getApp = function(){
-   return this.middleware;
+   return req;
 };
 
 /**
- * Notify about event
- * @param event
- * @param args
- * @private
+ * Returns expressjs app
+ * @returns {*}
  */
-Sailfish.prototype._notify = function(event, args){
-   var a = this.handlers[event] = this.handlers[event] || [];
-   a.forEach(function(hdl){
-      hdl.apply(null, args);
-   })
+Sailfish.prototype.getApp = function(){
+   return this.app;
 };
 
 var moduleExports = function(expressjs, cfg){
