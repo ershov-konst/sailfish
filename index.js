@@ -1,10 +1,10 @@
 var
-   async = require("async"),
-   domain = require('domain').create(),
-   express = require('express'),
+   domain = require('domain'),
+   express,
    nodePath = require('path'),
    fs = require('fs'),
    extend = require("node.extend"),
+   requirejs = require('requirejs'),
    lessCompiler = require("./lib/lessCompiler"),
    render = require("./lib/render"),
    router = require("./lib/router");
@@ -16,35 +16,24 @@ var
 var Sailfish = function(cfg){
    var self = this;
 
-   this.handlers = {};
+   this.requirejsCfg = undefined;
+   this.req = undefined;
    this.app = express();
 
-   this._validateConfig(cfg, function(err, config){
-      if (!err){
-         self.config = config;
+   this.handlers = {};
+   this.config = this._validateConfigSync(cfg);
 
-         //running mode
-         self.config["isDevelopment"] = self.config["isDevelopment"] !== undefined ? self.config["isDevelopment"] : 'development' == self.app.get('env');
+   this._run();
 
-         if (!self.config["isDevelopment"]){
-            //prepare css if current running mode is production
-            lessCompiler(config["components"], function(err){
-               if (err){
-                  throw err;
-               }
-               else{
-                  self._run();
-               }
-            });
-         }
-         else{
-            self._run();
-         }
-      }
-      else{
-         throw err;
-      }
-   });
+   //TODO: выпилить
+   /*if (!this.config["isDevelopment"]){
+    //prepare css if current running mode is production
+    lessCompiler(this.config["components"], function(err){
+    if (err){
+    throw err;
+    }
+    });
+    }*/
 };
 
 /**
@@ -63,60 +52,42 @@ Sailfish.prototype.on = function(event, fn){
 /**
  * validate and resolve paths in configuration
  * @param {Object} config - application cfg
- * @param {Function} cb - callback
  * @private
  */
-Sailfish.prototype._validateConfig = function(config, cb){
-   var
-      optionsToValidate = ["components", "controllers", "views"]; //options to check
+Sailfish.prototype._validateConfigSync = function(config){
+   var optionsToValidate = {
+      'components' : './components',
+      'controllers': './controllers',
+      'views'      : './views'
+   };
 
    /**
     * validate and resolve required param
     * @param {String} param - required param
-    * @param {Function} fn - callback
     */
-   function validateAndResolvePath(param, fn){
-      if (config[param]){
-         //resolve path if param exists in configuration
-         config[param] = nodePath.resolve(config["rootPath"], config[param]);
+   function validateAndResolvePath(param){
+      //resolve path, use param from config or default value
+      config[param] = nodePath.resolve(config["rootPath"], config[param] || optionsToValidate[param]);
 
-         //check resolved path on disk
-         fs.exists(config[param], function(exists){
-            if (exists){
-               fn();
-            }
-            else{
-               fn(new Error(param + " : '" + config[param] + "' not found"));
-            }
-         })
-      }
-      else{
-         fn(new Error("config param '" + param + "' is not defined"));
+      //check resolved path on disk
+      if(!fs.existsSync(config[param])){
+         throw new Error(param + " : '" + config[param] + "' not found");
       }
    }
 
-   //rootPath - is required param
-   if (config["rootPath"]){
-      fs.exists(config["rootPath"], function(exists){
-         if (exists){
-            //if exist - continue validation
-            async.map(optionsToValidate, validateAndResolvePath, function(err){
-               if (!err){
-                  cb(null, config);
-               }
-               else{
-                  cb(err);
-               }
-            });
-         }
-         else{
-            cb(new Error("rootPath : '" + config["rootPath"] + "' not found"));
-         }
-      })
+   config['rootPath'] = config['rootPath'] || process.cwd();
+
+   if (fs.existsSync(config["rootPath"])){
+      //if exist - continue validation
+      optionsToValidate.forEach(function(param){
+         validateAndResolvePath(param);
+      });
    }
    else{
-      cb(new Error("config param 'rootPath' is not defined"));
+      throw new Error("rootPath : '" + config["rootPath"] + "' not found");
    }
+
+   return config;
 };
 
 /**
@@ -135,24 +106,30 @@ Sailfish.prototype._run = function(){
       fs.mkdirSync(this.config["sf_build"]);
    }
 
-   this._prepareRequireJsCfg();
+   this.requirejsCfg = this._prepareRequireJsCfg();
+   this.requirejs = this._prepareRequirejsCtx();
 
    this.render = new render(this.config);
    this.router = new router(this.config);
 
-   //provide favicon if defined
-   if (this.config["favicon"]){
-      this.app.use(express.favicon(nodePath.resolve(this.config["rootPath"], this.config["favicon"])));
-   }
+   //prepare domain
+   this.app.use(function(req, res, next){
+      domain().run(function(){
+         //requirejs module "path-resolver" use process.domain
+         process.domain["componentRelativePath"] = nodePath.relative(self.config["rootPath"], self.config["components"]) + "/";
+         process.domain["libRelativePath"]       = nodePath.relative(self.config["rootPath"], self.config["sf_client"]) + "/lib/";
+         next();
+      });
+   });
 
-   if (this.config["isDevelopment"]) {
-      //less middleware
-      this.app.use('/components', require('less-middleware')({
-         src: this.config["components"],
-         force : true
-      }));
-   }
-   else{
+   //less middleware
+   this.app.use('/components', require('less-middleware')({
+      src: this.config["components"],
+      force : true
+   }));
+
+   //serve dir with build results
+   if (!this.config["isDevelopment"]) {
       this.app.use('/sf_build', express.static(this.config["sf_build"]));
    }
 
@@ -168,27 +145,6 @@ Sailfish.prototype._run = function(){
 
    //routing
    this.app.all(/\/(?:([^\/]*)\/?)?(?:([^\/]*)\/?)?(.*)?/, this.router.route.bind(this.router));
-
-   //errors handling
-   this.app.use(function(err, req, res, next) {
-      if (err){
-         self._notify("error", [err, req, res]);
-      }
-      else{
-         next();
-      }
-   });
-
-
-   domain.run(function(){
-      //requirejs module "path-resolver" use process.domain
-      process.domain["componentRelativePath"] = nodePath.relative(self.config["rootPath"], self.config["components"]) + "/";
-      process.domain["libRelativePath"]       = nodePath.relative(self.config["rootPath"], self.config["sf_client"]) + "/lib/";
-
-      self.app.listen(self.config["port"]);
-      console.log("sailfish application running at http://localhost:" + self.config["port"] + " [" + (self.config["isDevelopment"] ? "development" : "production") + " mode]");
-      self._notify("start");
-   });
 };
 
 /**
@@ -229,6 +185,22 @@ Sailfish.prototype._prepareRequireJsCfg = function(){
 
    //save config for server
    fs.writeFileSync(nodePath.join(path, "main-server.js"), "requirejs.config("+ JSON.stringify(result, null, 3) +");");
+
+   return result;
+};
+
+Sailfish.prototype._prepareRequirejsCtx = function(){
+   var requirejs = requirejs.config(this.requirejsCfg);
+
+   this.requirejsCfg["fakePaths"].forEach(function(toFake){
+      requirejs.define.apply(requirejs, [toFake, function(){}]);
+   });
+
+   return requirejs;
+};
+
+Sailfish.prototype.getApp = function(){
+   return this.middleware;
 };
 
 /**
@@ -244,7 +216,12 @@ Sailfish.prototype._notify = function(event, args){
    })
 };
 
-module.exports = {
-   Sailfish  : Sailfish,
-   Component : require("./lib/Component.js")
+var moduleExports = function(expressjs, cfg){
+   express = expressjs;
+   var sf = new Sailfish(cfg);
+   return sf.getApp();
 };
+
+moduleExports.Sailfish = Sailfish;
+moduleExports.Component = require("./lib/Component.js");
+module.exports = moduleExports;
