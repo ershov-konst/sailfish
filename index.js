@@ -16,23 +16,31 @@ var
 var Sailfish = function(cfg){
    var self = this;
 
+   this.componentRelativePath = undefined;
+   this.libRelativePath = undefined;
    this.requirejsCfg = undefined;
-   this.req = undefined;
+   this.requirejs = undefined;
+   this.sfReady = false;
    this.app = express();
 
    this.config = this._validateConfigSync(cfg);
 
    this._run();
 
-   //TODO: выпилить
-   /*if (!this.config["isDevelopment"]){
-    //prepare css if current running mode is production
-    lessCompiler(this.config["components"], function(err){
-    if (err){
-    throw err;
-    }
-    });
-    }*/
+   if (!self.config['debug']){
+      //prepare css if current running mode is production
+      lessCompiler(self.config["components"], function(err){
+         if (!err){
+            self.sfReady = true;
+         }
+         else{
+            throw err;
+         }
+      });
+   }
+   else {
+      this.sfReady = true;
+   }
 };
 
 /**
@@ -90,6 +98,9 @@ Sailfish.prototype._run = function(){
    //path for js/css packages
    this.config["sf_build"]  = nodePath.join(__dirname, "sf_build");
 
+   this.componentRelativePath = nodePath.relative(self.config["rootPath"], self.config["components"]) + "/";
+   this.libRelativePath = nodePath.relative(self.config["rootPath"], self.config["sf_client"]) + "/lib/";
+
    if(!fs.existsSync(this.config["sf_build"])){
       fs.mkdirSync(this.config["sf_build"]);
    }
@@ -102,12 +113,17 @@ Sailfish.prototype._run = function(){
 
    //prepare domain
    this.app.use(function(req, res, next){
-      domain.createDomain().run(function(){
-         //requirejs module "path-resolver" use process.domain
-         process.domain["componentRelativePath"] = nodePath.relative(self.config["rootPath"], self.config["components"]) + "/";
-         process.domain["libRelativePath"]       = nodePath.relative(self.config["rootPath"], self.config["sf_client"]) + "/lib/";
-         next();
-      });
+      if (self.sfReady){
+         domain.createDomain().run(function(){
+            //requirejs module "path-resolver" use process.domain
+            process.domain["componentRelativePath"] = self.componentRelativePath;
+            process.domain["libRelativePath"]       = self.libRelativePath;
+            next();
+         });
+      }
+      else{
+         res.send(503);
+      }
    });
 
    //less middleware
@@ -117,7 +133,7 @@ Sailfish.prototype._run = function(){
    }));
 
    //serve dir with build results
-   if (!this.config["isDevelopment"]) {
+   if (!this.config["debug"]) {
       this.app.use('/sf_build', express.static(this.config["sf_build"]));
    }
 
