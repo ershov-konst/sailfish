@@ -69,6 +69,8 @@ Sailfish.prototype._validateConfigSync = function(config){
       }
    }
 
+   config = config || {};
+
    config['rootPath'] = config['rootPath'] || process.cwd();
 
    if (fs.existsSync(config["rootPath"])){
