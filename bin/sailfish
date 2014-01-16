@@ -1,0 +1,27 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var
+   program = require('commander'),
+   mkdirp = require('mkdirp'),
+   pkg = require('../package.json'),
+   version = pkg.version;
+
+// CLI
+
+// Path
+
+program
+   .version(version)
+   .usage('[option] [dir]')
+   .option('-h, --helloworld', 'init helloworld application')
+   .parse(process.argv);
+
+var path = program.args.shift() || '.';
+
+(function createApplication(path) {
+   console.log(path)
+})(path);

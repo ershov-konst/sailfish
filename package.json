@@ -2,7 +2,11 @@
     "name": "sailfish",
     "version": "0.0.5",
     "main": "./index.js",
+    "bin": {
+        "sailfish": "./bin/sailfish"
+    },
     "dependencies": {
+        "commander": "2.1.x",
         "walk": "2.2.x",
         "tensor-xmldom": "0.1.x",
         "async": "0.2.x",
