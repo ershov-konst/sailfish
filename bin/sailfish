@@ -1,27 +1,98 @@
 #!/usr/bin/env node
 
-/**
- * Module dependencies.
- */
-
 var
    program = require('commander'),
-   mkdirp = require('mkdirp'),
    pkg = require('../package.json'),
-   version = pkg.version;
-
-// CLI
-
-// Path
+   readline = require('readline'),
+   fs = require('fs'),
+   os = require('os'),
+   mkdirp = require('mkdirp'),
+   nodePath = require('path'),
+   version = pkg.version,
+   eol = os.EOL;
 
 program
    .version(version)
    .usage('[option] [dir]')
-   .option('-h, --helloworld', 'init helloworld application')
+   .option('-h, --helloworld', 'init "hello world" application')
    .parse(process.argv);
 
 var path = program.args.shift() || '.';
 
-(function createApplication(path) {
-   console.log(path)
-})(path);
+var appStr = {
+   components : {},
+   controllers: {},
+   views : {}
+};
+
+var rl = readline.createInterface({
+   input: process.stdin,
+   output: process.stdout
+});
+
+appStr['app.js'] = [
+   'var',
+   '  express = require(\'express\'),',
+   '  sailfish = require(\'sailfish\'),',
+   '  config = require(\'./config.json\'),',
+   '  app;',
+   '',
+   'app = sailfish(express, config);',
+   'app.listen(process.env.PORT || 10001);',
+   'console.log(\'application running on localhost:\' + (process.env.PORT || 10001));'
+].join(eol);
+
+appStr['config.json'] = '{}';
+
+appStr.controllers['index.js'] = [
+   'module.exports = {',
+   '  index : function(req, res){',
+   '    res.send(\'Welcome to sailfish.js!\');',
+   '  }',
+   '};'
+].join(eol);
+
+
+function createApplication(path, appStr) {
+   for (var i in appStr){
+      if (appStr.hasOwnProperty(i)){
+         var p = nodePath.join(path, i);
+         console.log('create : ' + p);
+         if (Object.prototype.toString.call(appStr[i]) == '[object Object]'){
+            mkdirp.sync(p, 0755);
+            createApplication(p, appStr[i]);
+         }
+         else {
+            fs.writeFileSync(p, appStr[i]);
+         }
+      }
+   }
+}
+
+(function start(){
+   fs.readdir(path, function(err, files){
+      if (err && 'ENOENT' != err.code){
+         throw err;
+      }
+      if(files && files.length){
+         rl.question('destination is not empty, continue? y/n : ', function(answer){
+            if (answer == 'y'){
+               createApplication(path, appStr);
+            }
+            else{
+               console.error('aborting...');
+            }
+            process.exit(1);
+         });
+      }
+      else{
+         mkdirp(path, 0755, function(err){
+            if (err){
+               throw err;
+            }
+            createApplication(path, appStr);
+            process.exit(1);
+         });
+      }
+   });
+}());
