@@ -19,6 +19,8 @@ program
 
 var path = program.args.shift() || '.';
 
+var appName = nodePath.basename(path == '.' ? process.cwd() : path);
+
 var appStr = {
    components : {},
    controllers: {},
@@ -39,17 +41,32 @@ appStr['app.js'] = [
    '',
    'app = sailfish(express, config);',
    'app.listen(process.env.PORT || 10001);',
-   'console.log(\'application running on localhost:\' + (process.env.PORT || 10001));'
+   'console.log(\'application running on localhost:\' + (process.env.PORT || 10001));',
+   ''
 ].join(eol);
 
 appStr['config.json'] = '{}';
+
+appStr['package.json'] = [
+   '{',
+   '  "name": "'+ appName +'",',
+   '  "version": "0.0.0",',
+   '  "main": "./app.js",',
+   '  "dependencies" : {',
+   '     "express": "3.4.x",',
+   '     "sailfish": "latest"',
+   '  }',
+   '}',
+   ''
+].join(eol);
 
 appStr.controllers['index.js'] = [
    'module.exports = {',
    '  index : function(req, res){',
    '    res.send(\'Welcome to sailfish.js!\');',
    '  }',
-   '};'
+   '};',
+   ''
 ].join(eol);
 
 
@@ -69,7 +86,21 @@ function createApplication(path, appStr) {
    }
 }
 
-(function start(){
+function start(){
+   createApplication(path, appStr);
+   console.log([
+      '',
+      '  install dependencies:',
+      '     $ cd '+ appName +' && npm install',
+      '',
+      '  run the app:',
+      '     $ node app.js',
+      ''
+   ].join(eol));
+   process.exit(1);
+}
+
+(function init(){
    fs.readdir(path, function(err, files){
       if (err && 'ENOENT' != err.code){
          throw err;
@@ -77,12 +108,12 @@ function createApplication(path, appStr) {
       if(files && files.length){
          rl.question('destination is not empty, continue? y/n : ', function(answer){
             if (answer == 'y'){
-               createApplication(path, appStr);
+               start();
             }
             else{
                console.error('aborting...');
+               process.exit(1);
             }
-            process.exit(1);
          });
       }
       else{
@@ -90,8 +121,7 @@ function createApplication(path, appStr) {
             if (err){
                throw err;
             }
-            createApplication(path, appStr);
-            process.exit(1);
+            start();
          });
       }
    });
