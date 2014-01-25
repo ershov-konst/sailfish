@@ -71,13 +71,17 @@ appStr.views.default['index.html'] = [
    '  <body>',
    '     {{=it.content}}',
    '  </body>',
-   '</html>'
+   '</html>',
+   ''
 ].join(eol);
 
 appStr.controllers['index.js'] = [
    'module.exports = {',
    '  index : function(req, res){',
-   '    res.send(\'Welcome to sailfish.js!\');',
+   '    res.render(\'default\', {',
+   '      title: \'sailfish.js\',',
+   '      content: \'Welcome to sailfish.js!\'',
+   '    });',
    '  }',
    '};',
    ''
