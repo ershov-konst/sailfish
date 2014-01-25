@@ -146,7 +146,7 @@ Sailfish.prototype._run = function(){
 
    //render engine
    this.app.set('views', this.config["views"]);
-   this.app.set('view engine', 'xhtml');
+   this.app.set('view engine', 'html');
    this.app.engine('html', this.render.render.bind(this.render));
 
    //routing
