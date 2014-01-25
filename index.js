@@ -147,7 +147,7 @@ Sailfish.prototype._run = function(){
    //render engine
    this.app.set('views', this.config["views"]);
    this.app.set('view engine', 'xhtml');
-   this.app.engine('xhtml', this.render.render.bind(this.render));
+   this.app.engine('html', this.render.render.bind(this.render));
 
    //routing
    this.app.all(/\/(?:([^\/]*)\/?)?(?:([^\/]*)\/?)?(.*)?/, this.router.route.bind(this.router));
