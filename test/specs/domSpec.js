@@ -2,7 +2,7 @@ define(['js!dom'], function(dom){
 
    describe('configFromXML', function() {
       var
-         xml = '<component data-component="test1" singleQuote=\'test2\'>\
+         xml = '<component name="test0" data-component="test1" singleQuote=\'test2\'>\
                      <foo>bar</foo>\
                      <num>42</num>\
                      <bool>false</bool>\
@@ -64,6 +64,7 @@ define(['js!dom'], function(dom){
          }
 
          expect(result, {
+            "name" : "test0",
             "data-component" : "test1",
             "singleQuote" : "test2"
          });

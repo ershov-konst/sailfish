@@ -4,23 +4,19 @@ define(['js!utils'], function(utils){
 
       it('parseMarkup.simpleTypes', function() {
          var
-            element = document.createElement('component'),
-            innerHTML = '\
-               <o name="foo">bar</o>\
-               <o name="num">42</o>\
-               <o name="bool">false</o>\
-               <o name="null">null</o>\
-               <o name="undefined">undefined</o>\
-            ',
+            innerHTML = '<component id="1" name="test">\
+                            <foo>bar</foo>\
+                            <num>42</num>\
+                            <bool>false</bool>\
+                            <null>null</null>\
+                            <undefined>undefined</undefined>\
+                         </component>',
             res;
 
-         element.setAttribute('name', 'test');
-         element.innerHTML = innerHTML;
-
-         res = utils.parseMarkup(element);
+         res = utils.parseMarkup(innerHTML);
 
          expect(res).toEqual({
-            element: element,
+            id: '1',
             name: 'test',
             foo: 'bar',
             num: 42,
@@ -31,23 +27,18 @@ define(['js!utils'], function(utils){
       });
 
       it('parseMarkup.array', function() {
-         var
-            element = document.createElement('component'),
-            innerHTML = '\
-               <o name="arr" type="array">\
-                  <o name="foo">bar</o>\
-                  <o name="num">42</o>\
-                  <o name="bool">false</o>\
-                  <o name="null">null</o>\
-                  <o name="undefined">undefined</o>\
-               </o>\
-            ',
+         var xml = '<component name="test">\
+                        <arr type="array">\
+                           <foo>bar</foo>\
+                           <num>42</num>\
+                           <bool>false</bool>\
+                           <null>null</null>\
+                           <undefined>undefined</undefined>\
+                        </arr>\
+                     </component>',
             res;
 
-         element.setAttribute('name', 'test');
-         element.innerHTML = innerHTML;
-
-         res = utils.parseMarkup(element);
+         res = utils.parseMarkup(xml);
 
          expect(res.arr).toEqual([
             'bar',
@@ -59,23 +50,18 @@ define(['js!utils'], function(utils){
       });
 
       it('parseMarkup.object', function() {
-         var
-            element = document.createElement('component'),
-            innerHTML = '\
-               <o name="obj" type="object">\
-                  <o name="foo">bar</o>\
-                  <o name="num">42</o>\
-                  <o name="bool">false</o>\
-                  <o name="null">null</o>\
-                  <o name="undefined">undefined</o>\
-               </o>\
-            ',
+         var xml = '<component name="test">\
+                       <obj type="object">\
+                          <foo>bar</foo>\
+                          <num>42</num>\
+                          <bool>false</bool>\
+                          <null>null</null>\
+                          <undefined>undefined</undefined>\
+                       </obj>\
+                    </component>',
             res;
 
-         element.setAttribute('name', 'test');
-         element.innerHTML = innerHTML;
-
-         res = utils.parseMarkup(element);
+         res = utils.parseMarkup(xml);
 
          expect(res.obj).toEqual({
             'foo': 'bar',
@@ -87,20 +73,14 @@ define(['js!utils'], function(utils){
       });
 
       it('parseMarkup.objectDeclarationByAttr', function() {
-         var
-            element = document.createElement('component'),
-            innerHTML = '\
-               <o name="obj" type="object" foo="bar" num="42" bool="false" null="null" undefined="undefined"></o>\
-            ',
+         var xml = '<component name="test">\
+                       <obj type="object" foo="bar" num="42" bool="false" null="null" undefined="undefined"></obj>\
+                    </component>',
             res;
 
-         element.setAttribute('name', 'test');
-         element.innerHTML = innerHTML;
-
-         res = utils.parseMarkup(element);
+         res = utils.parseMarkup(xml);
 
          expect(res.obj).toEqual({
-            'name': 'obj',
             'type': 'object',
             'foo': 'bar',
             'num': 42,
@@ -111,26 +91,21 @@ define(['js!utils'], function(utils){
       });
 
       it('parseMarkup.nestedObjects', function() {
-         var
-            element = document.createElement('component'),
-            innerHTML = '\
-               <o name="obj" type="object">\
-                  <o name="arr" type="array">\
-                     <o type="object" name="obj">\
-                     </o>\
-                     <o type="object"></o>\
-                     <o type="object" foo="bar"></o>\
-                     <o type="object" bool="false"></o>\
-                  </o>\
-                  <o name="obj" type="object" foo="bar" num="42" bool="false" null="null" undefined="undefined"></o>\
-               </o>\
-            ',
+         var xml = '<component name="test">\
+                       <obj type="object">\
+                          <arr type="array">\
+                             <o type="object">\
+                             </o>\
+                             <o type="object"></o>\
+                             <o type="object" foo="bar"></o>\
+                             <o type="object" bool="false"></o>\
+                          </o>\
+                          <obj type="object" foo="bar" num="42" bool="false" null="null" undefined="undefined"></o>\
+                       </obj>\
+                    </component>',
             res;
 
-         element.setAttribute('name', 'test');
-         element.innerHTML = innerHTML;
-
-         res = utils.parseMarkup(element);
+         res = utils.parseMarkup(xml);
 
          expect(res.obj).toEqual({
             'arr': [
@@ -148,7 +123,6 @@ define(['js!utils'], function(utils){
                }
             ],
             'obj': {
-               'name': 'obj',
                'type': 'object',
                'foo': 'bar',
                'num': 42,
@@ -161,7 +135,7 @@ define(['js!utils'], function(utils){
 
       it('parseMarkup.parseAttr', function() {
          var
-            element = document.createElement('component'),
+            markup,
             cfg = {
                'name': 'john',
                'foo' : 'bar',
@@ -171,12 +145,11 @@ define(['js!utils'], function(utils){
             },
             res;
 
-         element.setAttribute('config', encodeURIComponent(JSON.stringify(cfg)).replace(/'/g, '&quot;'));
-
-         res = utils.parseMarkup(element);
-         delete res.element;
+         markup = "<component id='2' config='"+ utils.encodeConfig(cfg) +"' />";
+         res = utils.parseMarkup(markup);
 
          expect(res).toEqual({
+            'id': '2',
             'name': 'john',
             'foo' : 'bar',
             'num' : 42,
