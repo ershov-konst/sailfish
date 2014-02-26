@@ -8,7 +8,6 @@
     "dependencies": {
         "commander": "2.1.x",
         "walk": "2.2.x",
-        "tensor-xmldom": "0.1.x",
         "async": "0.2.x",
         "node.extend": "1.0.x",
         "dot": "1.0.x",
