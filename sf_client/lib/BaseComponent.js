@@ -1,5 +1,8 @@
 define('js!BaseComponent', ['js!utils', 'js!Abstract', 'js!dom'], function(utils, Abstract, dom){
 
+   var global = (function(){return this || (0,eval)('this')})();
+   global.require = require;
+
    return Abstract.extend({
       _dotTplFn : null,
       _container : null,
@@ -62,7 +65,7 @@ define('js!BaseComponent', ['js!utils', 'js!Abstract', 'js!dom'], function(utils
             //try to parse component type
             componentType = /data-component=('|")([^'"]*)\1/.exec(markup)[2];
             //get constructor
-            constructor = require('js!' + componentType);
+            constructor = global.require('js!' + componentType);
          }
          catch (e){
             throw new Error('can`t resolve component type. Markup: \n' + markup);
@@ -112,13 +115,6 @@ define('js!BaseComponent', ['js!utils', 'js!Abstract', 'js!dom'], function(utils
             parent = this._container.parentNode;
 
          parent.removeChild(this._container);
-      },
-      _parseCfg : function(options, cfg){
-         var
-            res = {},
-            parsed = utils.parseMarkup(cfg);
-         utils.extend(true, res, options, parsed);
-         return res;
       },
       destroy : function(){
          this._removeContainer();
