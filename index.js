@@ -116,7 +116,7 @@ Sailfish.prototype._run = function(){
    //prepare domain
    this.app.use(function(req, res, next){
       if (self.sfReady){
-         domain.createDomain().run(function(){
+         domain.create().run(function(){
             //requirejs module "path-resolver" use process.domain
             process.domain["componentRelativePath"] = self.componentRelativePath;
             process.domain["libRelativePath"]       = self.libRelativePath;
