@@ -1,25 +1,48 @@
-define("js!BaseComponent", ["js!utils", "js!Abstract"], function(utils, Abstract){
+define('js!BaseComponent', ['js!utils', 'js!Abstract', 'js!dom'], function(utils, Abstract, dom){
 
    return Abstract.extend({
       _dotTplFn : null,
       _container : null,
       _options : {
-         name : ""
+         element: null,
+         name : ''
       },
       init : function(cfg){
          this._super(cfg);
 
-         if (cfg instanceof Node){
-            this._container = cfg;
-            this._options = this._parseCfg(this._options, cfg);
+         switch (utils.type(cfg)){
+            case 'element':
+               utils.extend(true, this._options, utils.parseOptions(cfg));
+               this._container = cfg;
+               break;
+            case 'object':
+               utils.extend(true, this._options, cfg);
+               this._container = cfg.element;
+               break;
+            default:
+               throw new Error('can`t resolve options');
          }
 
+         var buffer;
+         //have the opportunity to build a markup
          if (this._dotTplFn){
-            this._createMarkup(this._container);
-         }
+            //is no markup yet
+            if (!this._hasMarkup(this._container)){
+               var tmp = document.createElement('body');
 
-         this._container.removeAttribute("config");
-         this._container.setAttribute("id", this._id = utils.generateId());
+               tmp.innerHTML = this._buildMarkup(this._dotTplFn, this._options);
+               buffer = tmp.firstChild;
+
+               if (this._container && this._container.parentNode){
+                  this._container.parentNode.replaceChild(tmp.firstChild, this._container);
+               }
+            }
+            else {
+               buffer = this._container;
+            }
+
+            this._container = buffer;
+         }
       },
       container : function(){
          return this._container;
@@ -27,36 +50,62 @@ define("js!BaseComponent", ["js!utils", "js!Abstract"], function(utils, Abstract
       name : function(){
          return this._options.name;
       },
-      _createMarkup : function(){
-         if (!this._container || !/sf-has-markup/.test(this._container.className)){
-            var
-               e,
-               container = document.createElement("div"),
-               parentNode = this._container ? this._container.parentNode : undefined;
 
-            container.innerHTML = this._dotTplFn(this._options);
-            e = this._prepareContainer(this._container ? this._container : undefined, container.childNodes[0]);
+      _prepareMarkup: function(markup, parentId){
+         var
+            componentType = '',
+            options = {},
+            constructor = null,
+            parsedOptions = {};
 
-            if (parentNode){
-               parentNode.replaceChild(e, this._container);
-            }
-
-            this._container = e;
+         try{
+            //try to parse component type
+            componentType = /data-component=('|")([^'"]*)\1/.exec(markup)[2];
+            //get constructor
+            constructor = require('js!' + componentType);
          }
+         catch (e){
+            throw new Error('can`t resolve component type. Markup: \n' + markup);
+         }
+
+         if (constructor){
+            if (typeof constructor.prototype._dotTplFn == 'function'){
+               //parse configuration
+               parsedOptions = utils.parseMarkup(markup);
+               utils.extend(true, options, constructor.prototype._options, parsedOptions);
+
+               markup = this._buildMarkup(constructor.prototype._dotTplFn, options);
+
+               //append important attributes
+               markup = markup.replace(/^<\/?[a-z][a-z0-9]*/, function(start){
+                  var attributes = " config='"+ utils.encodeConfig(parsedOptions) +"' hasmarkup='true' ";
+                  if (options.id){
+                     attributes += ("id='"+ options.id +"' ")
+                  }
+                  if (parentId){
+                     attributes += ("data-pid='"+ parentId +"' ");
+                  }
+                  return start + attributes;
+               })
+            }
+         }
+
+         return markup;
       },
-      _prepareContainer : function(placeholder, element){
-         element.setAttribute("class", element.getAttribute("class") + " sf-has-markup");
-         if (placeholder){
-            element.setAttribute("data-component", placeholder.getAttribute("data-component"));
-         }
-         if (typeof window == "undefined"){
-            var name = placeholder.getAttribute("name");
-            if (name){
-               element.setAttribute("name", name);
-            }
-            element.setAttribute("config", placeholder.getAttribute("config"));
-         }
-         return element;
+      _buildMarkup: function(dotTplFn, options){
+         var
+            self = this,
+            markup;
+
+         //create markup
+         markup = dotTplFn(options);
+         //inline inner components
+         return dom.replaceComponents(markup, function(componentStr){
+            return self._prepareMarkup(componentStr, options.id);
+         });
+      },
+      _hasMarkup: function(container){
+         return container && container.getAttribute && container.getAttribute('hasmarkup') == 'true';
       },
       _removeContainer : function(){
          var
@@ -70,17 +119,6 @@ define("js!BaseComponent", ["js!utils", "js!Abstract"], function(utils, Abstract
             parsed = utils.parseMarkup(cfg);
          utils.extend(true, res, options, parsed);
          return res;
-      },
-      _decodeConfig: function(encodedCfg){
-         var result;
-
-         try{
-            result = JSON.parse(decodeURIComponent(encodedCfg.replace(/&quot;|"/g,'\'')));
-         }
-         catch(e){
-            throw new Error("Ошибка разбор конфигурации для компонента");
-         }
-         return result;
       },
       destroy : function(){
          this._removeContainer();

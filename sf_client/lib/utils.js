@@ -1,30 +1,7 @@
 /**
  * @module js!utils
  */
-define("js!utils", function(){
-
-   function getTagName(elem) {
-      //IE8 DOM localName is undefined, checking nodeName instead.
-      return elem.localName || (elem.nodeName && elem.nodeName.toLowerCase());
-   }
-
-
-   function getChildNodes(elem){
-      var doc = null;
-      if (elem.innerHTML && typeof window !== 'undefined' && window.ActiveXObject){
-         doc = new ActiveXObject('Microsoft.XMLDOM');
-         doc.async = false;
-         doc.loadXML('<doc>' + elem.innerHTML + '</doc>');
-         doc = doc.documentElement;
-      }
-      else{
-         doc = elem;
-      }
-      if (!doc){
-         throw new Error('Ошибка разбора конфигурации компонента! Configuration:\n' + elem.innerHTML);
-      }
-      return doc.childNodes;
-   }
+define('js!utils', ['js!dom'], function(dom){
 
    function resolveType(value){
 
@@ -61,9 +38,9 @@ define("js!utils", function(){
 
       if (elem.nodeType === 3){ //TEXT_NODE
          //если это любой непробельный символ - считаем, что это часть контента, иначе скорее всего перевод строки - пропускаем
-         result = /\S/.test(elem.textContent) ? {name : 'content', value : elem.textContent} : false;
+         result = /\S/.test(elem.text) ? {name : 'content', value : elem.text} : false;
       }
-      else if (getTagName(elem) == 'o') {
+      else {
          if (/Object|object|Array|array/.test(elem.getAttribute('type'))){
             var
                isArray = /Array|array/.test(elem.getAttribute('type')),
@@ -94,16 +71,19 @@ define("js!utils", function(){
             }
 
             result =  {
-               'name' : elem.getAttribute('name') || 'Object',
+               'name' : elem.nodeName,
                'value': res
             }
+         }
+         else if (/HTML|html/.test(elem.getAttribute('type'))){
+            result = {name : elem.nodeName, value : elem.innerHTML()};
          }
          else{
             var
                obj = {},
-               content = elem.innerHTML || elem.text || "";
+               content = elem.innerHTML();
 
-            obj.name = elem.getAttribute('name');
+            obj.name = elem.nodeName;
             obj.value= elem.getAttribute('value');
 
             if (content.length){
@@ -115,25 +95,10 @@ define("js!utils", function(){
             result = obj;
          }
       }
-      else if ('outerHTML' in elem){
-         result = {name : "content", value : elem.outerHTML};
-      }
+
 
       return result;
    }
-
-   function decodeConfig(encodedCfg){
-      var result;
-
-      try{
-         result = JSON.parse(decodeURIComponent(encodedCfg.replace(/&quot;|"/g,'\'')));
-      }
-      catch(e){
-         throw new Error("Ошибка разбор конфигурации для компонента");
-      }
-      return result;
-   }
-
 
 
    /**
@@ -365,41 +330,39 @@ define("js!utils", function(){
 
    /**
     * Parse configuration from html element declaration
-    * @param {HTMLElement} cfg HTMLElement contained config declared by html
+    * @param {HTMLElement} markup HTMLElement contained config declared by html
     * @returns {Object}
     */
-   utils.parseMarkup = function(cfg){
+   utils.parseMarkup = function(markup){
+      var
+         xmlObject = dom.parse(markup),
+         obj,
+         childNodes;
 
-      if (cfg && cfg.cloneNode){ // Bugfix. IE8 type of DOM elements functions == "object".
-         var
-            obj,
-            childNodes;
-
-         try{
-            obj = cfg.getAttribute ? decodeConfig(cfg.getAttribute('config') || '{}') : {};
+      for (var cI = 0, cL = xmlObject.childNodes.length; cI < cL; cI++){
+         if (xmlObject.childNodes[cI].nodeType == 1){
+            xmlObject = xmlObject.childNodes[cI];
+            break;
          }
-         catch(e){
-            throw new Error('parseMarkup: parse error!');
-         }
+      }
 
-         obj.name = (cfg.getAttribute ? cfg.getAttribute('name') : null)
-            || obj.name || '';
-         obj.element = cfg;
-         cfg = obj;
+      obj = utils.parseOptions(xmlObject);
 
-         if (cfg.element.getAttribute('hasMarkup') !== 'true'){
-            childNodes = getChildNodes(cfg.element);
-            if (childNodes.length){
-               for (var i = 0, l = childNodes.length; i < l; i++){
-                  var field = parseElem(childNodes[i]);
-                  if (field){
-                     if (field.name == 'content'){
-                        cfg.content = cfg.content || '';
-                        cfg.content += field.value;
-                     }
-                     else{
-                        cfg[field.name] = field.value;
-                     }
+      obj.name = xmlObject.getAttribute('name') || obj.name || '';
+      obj.id   = xmlObject.getAttribute('id')   || obj.id   || utils.generateId();
+
+      if (xmlObject.getAttribute('hasMarkup') !== 'true'){
+         childNodes = xmlObject.childNodes;
+         if (childNodes.length){
+            for (var i = 0, l = childNodes.length; i < l; i++){
+               var field = parseElem(childNodes[i]);
+               if (field){
+                  if (field.name == 'content'){
+                     obj.content = obj.content || '';
+                     obj.content += field.value;
+                  }
+                  else{
+                     obj[field.name] = field.value;
                   }
                }
             }
@@ -407,6 +370,33 @@ define("js!utils", function(){
       }
 
       return obj;
+   };
+
+   utils.parseOptions = function(container){
+      var result = {};
+      try{
+         result = utils.decodeConfig(container.getAttribute('config') || '{}');
+      }
+      catch(e){
+         throw new Error('parse options error: \n' + e);
+      }
+      return result;
+   };
+
+   utils.decodeConfig = function(encodedCfg){
+      var result;
+
+      try{
+         result = JSON.parse(decodeURIComponent(encodedCfg.replace(/&quot;|"/g,'\'')));
+      }
+      catch(e){
+         throw new Error("Ошибка разбор конфигурации для компонента");
+      }
+      return result;
+   };
+
+   utils.encodeConfig = function(json){
+      return encodeURIComponent(JSON.stringify(json)).replace(/'/g, '&quot;');
    };
 
    return utils;
