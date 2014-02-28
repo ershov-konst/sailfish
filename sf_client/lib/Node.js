@@ -1,9 +1,6 @@
 define('js!Node', function(){
 
    var Node = function(cfg){
-      this.startTag   = cfg.startTag || '';
-      this.closeTag   = '';
-
       this.nodeType   = cfg.nodeType;
       this.nodeName   = cfg.nodeName;
       this.attributes = cfg.attributes || [];
@@ -33,7 +30,7 @@ define('js!Node', function(){
    };
 
    Node.prototype.outerHTML = function(){
-      return this.startTag + this.innerHTML() + this.closeTag;
+      return this._getOpenTagStr() + this.innerHTML() + this._getCloseTagStr();
    };
 
    Node.prototype.getElementsByTagName = function(tagName){
@@ -47,6 +44,13 @@ define('js!Node', function(){
          }
       }
       return result;
+   };
+
+   Node.prototype._getOpenTagStr = function(){
+      return '<' + this.nodeName + (this.attributes.length ? ' ' : '') + this.attributes.map(function(attr){return attr.name + '="' + attr.value +'"'}).join(' ') + '>';
+   };
+   Node.prototype._getCloseTagStr = function(){
+      return '</' + this.nodeName + '>';
    };
 
    return Node;

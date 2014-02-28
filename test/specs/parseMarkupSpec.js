@@ -99,8 +99,8 @@ define(['js!utils'], function(utils){
                              <o type="object"></o>\
                              <o type="object" foo="bar"></o>\
                              <o type="object" bool="false"></o>\
-                          </o>\
-                          <obj type="object" foo="bar" num="42" bool="false" null="null" undefined="undefined"></o>\
+                          </arr>\
+                          <obj type="object" foo="bar" num="42" bool="false" null="null" undefined="undefined"></obj>\
                        </obj>\
                     </component>',
             res;

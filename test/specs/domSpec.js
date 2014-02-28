@@ -2,11 +2,12 @@ define(['js!dom'], function(dom){
 
    describe('configFromXML', function() {
       var
-         xml = '<component name="test0" data-component="test1" singleQuote=\'test2\'>\
+         xml = '<component name="test0" data-component="test1">\
                      <foo>bar</foo>\
                      <num>42</num>\
                      <bool>false</bool>\
                      <null>null</null>\
+                     <camelCase>null</camelCase>\
                      <undefined>undefined</undefined>\
                      <object type="object">\
                         <foo>bar</foo>\
@@ -48,7 +49,7 @@ define(['js!dom'], function(dom){
             }
          }
 
-         expect(count).toEqual(6);
+         expect(count).toEqual(7);
       });
 
       it('attributes', function(){
@@ -59,16 +60,16 @@ define(['js!dom'], function(dom){
 
          for (var i in attrs){
             if (attrs.hasOwnProperty(i)){
-               result[i] = component.getAttribute(i);
+               result[attrs[i].name] = component.getAttribute(attrs[i].name);
             }
          }
 
-         expect(result, {
+         expect(result).toEqual({
             "name" : "test0",
-            "data-component" : "test1",
-            "singleQuote" : "test2"
+            "data-component" : "test1"
          });
       });
    });
 
 });
+

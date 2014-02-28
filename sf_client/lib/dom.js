@@ -1,14 +1,8 @@
-define('js!dom', ['js!Node'], function(Node){
+define('js!dom', ['js!Node', 'js!sax'], function(Node, sax){
    var
       tagRegExp = /(<\/?[a-z][a-z0-9]*\s*(?:\s+[a-z0-9-_]+=(?:(?:'.*?')|(?:".*?")))*\s*\/?>)|([^<]|<(?![a-z\/]))*/gi,
-      attrRegExp = /\s[a-z0-9-_]+\b(=('|").*?\2)?/gi,
       startComponent = /^<component/,
-      endComponent = /^<\/component>/,
-      startTag = /^<[a-z]/,
-      selfClose = /\/>$/,
-      closeTag = /^<\//,
-      nodeName = /<([a-z][a-z0-9]*)/i,
-      attributeQuotes = /(^'|")|('|")$/g;
+      endComponent = /^<\/component>/;
 
    function replaceComponents(markup, fn){
       var
@@ -45,55 +39,58 @@ define('js!dom', ['js!Node'], function(Node){
 
    function parse(markup){
       var
-         tags = markup instanceof Array ? markup : markup.match(tagRegExp),
          result = new Node({
             childNodes: [],
             parentNode: null
          }),
+         parser = sax.parser(true),
+         attributes = [],
          buffer,
-         currentObject = result,
-         tag,
-         attrBuffer = [],
-         attrStr = [],
-         attributes = [];
+         currentObject = result;
 
-      for (var i = 0, l = tags.length; i < l; i++){
-         tag = tags[i];
+      parser.onerror = function(e){
+         throw new Error('Markup parse error! Originnal error:\n' + e);
+      };
 
-         if (startTag.test(tag)){
-            attributes = [];
-            attrStr = tag.match(attrRegExp) || [];
-            for (var aI = 0, aL = attrStr.length; aI < aL; aI++){
-               attrBuffer = attrStr[aI].split('=');
-               attributes.push({
-                  name: attrBuffer[0].replace(/^\s/, ''),
-                  value: (attrBuffer[1] || '').replace(attributeQuotes, '')
-               });
-            }
-            currentObject.childNodes.push(buffer = new Node({
-               nodeType: 1, //element node
-               nodeName : tag.match(nodeName)[1],
-               attributes: attributes,
-               childNodes: [],
-               parentNode: currentObject,
-               startTag: tag
-            }));
-            if (!selfClose.test(tag)){
-               currentObject = buffer;
-            }
-         }
-         else if (closeTag.test(tag)){
-            currentObject.closeTag = tag;
-            currentObject = currentObject.parentNode;
-         }
-         else {
+      parser.ontext = function(text){
+         if (currentObject){
             currentObject.childNodes.push(new Node({
                nodeType: 3,
-               text: tag,
+               text: text,
                parentNode: currentObject
             }));
          }
-      }
+      };
+
+      parser.onopentag = function(node){
+         attributes = [];
+         for (var i in node.attributes){
+            if (node.attributes.hasOwnProperty(i)){
+               attributes.push({
+                  name: i,
+                  value: node.attributes[i]
+               });
+            }
+         }
+
+         currentObject.childNodes.push(buffer = new Node({
+            nodeType: 1, //element node
+            nodeName : node.name,
+            attributes: attributes,
+            childNodes: [],
+            parentNode: currentObject
+         }));
+         if (!node.isSelfClosing){
+            currentObject = buffer;
+         }
+      };
+
+      parser.onclosetag = function(){
+         currentObject = currentObject.parentNode;
+      };
+
+      parser.write(markup).close();
+
       return result;
    }
 
