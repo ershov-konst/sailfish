@@ -7,7 +7,7 @@ var
    requirejs = require('requirejs'),
    lessCompiler = require("./lib/lessCompiler"),
    render = require("./lib/render"),
-   router = require("./lib/router");
+   baseRouting = require("./lib/router");
 
 /**
  * @param {Object} cfg - config
@@ -16,6 +16,7 @@ var
 var Sailfish = function(cfg){
    var self = this;
 
+   this.render = null;
    this.componentRelativePath = undefined;
    this.libRelativePath = undefined;
    this.requirejsCfg = undefined;
@@ -111,7 +112,6 @@ Sailfish.prototype._run = function(){
    this.requirejs = this._prepareRequirejsCtx();
 
    this.render = new render(this.config, this.requirejs);
-   this.router = new router(this.config);
 
    //prepare domain
    this.app.use(function(req, res, next){
@@ -148,9 +148,6 @@ Sailfish.prototype._run = function(){
    this.app.set('views', this.config["views"]);
    this.app.set('view engine', 'html');
    this.app.engine('html', this.render.render.bind(this.render));
-
-   //routing
-   this.app.all(/\/(?:([^\/]*)\/?)?(?:([^\/]*)\/?)?(.*)?/, this.router.route.bind(this.router));
 };
 
 /**
@@ -225,5 +222,6 @@ var moduleExports = function(expressjs, cfg){
 };
 
 moduleExports.Sailfish = Sailfish;
+moduleExports.baseRouting = baseRouting;
 moduleExports.Component = require("./lib/Component.js");
 module.exports = moduleExports;
