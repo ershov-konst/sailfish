@@ -238,7 +238,11 @@ moduleExports.baseRouting = function(controllersPath){
    router = new Router(controllersPath);
 
    return function(req, res, next){
-      req.params = req.originalUrl.exec(regExp) || [];
+      req.params = [];
+      var a = regExp.exec(req.originalUrl) || [];
+      for (var i = 1, l = a.length; i < l; i++){
+         a[i] && req.params.push(a[i]);
+      }
       router.route.apply(router, arguments);
    }
 };
