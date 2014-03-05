@@ -7,7 +7,7 @@ var
    requirejs = require('requirejs'),
    lessCompiler = require("./lib/lessCompiler"),
    render = require("./lib/render"),
-   baseRouting = require("./lib/router");
+   Router = require("./lib/router");
 
 /**
  * @param {Object} cfg - config
@@ -52,7 +52,6 @@ var Sailfish = function(cfg){
 Sailfish.prototype._validateConfigSync = function(config){
    var optionsToValidate = {
       'components' : './components',
-      'controllers': './controllers',
       'views'      : './views'
    };
 
@@ -222,6 +221,25 @@ var moduleExports = function(expressjs, cfg){
 };
 
 moduleExports.Sailfish = Sailfish;
-moduleExports.baseRouting = baseRouting;
 moduleExports.Component = require("./lib/Component.js");
+moduleExports.baseRouting = function(controllersPath){
+   var
+      router,
+      regExp = /\/(?:([^\/]*)\/?)?(?:([^\/]*)\/?)?(.*)?/;
+
+   //resolve path
+   controllersPath = nodePath.resolve(process.cwd(), controllersPath || './controllers');
+
+   //check resolved path on disk
+   if(!fs.existsSync(controllersPath)){
+      throw new Error("baseRouting : '" + controllersPath + "' not found");
+   }
+
+   router = new Router(controllersPath);
+
+   return function(req, res, next){
+      req.params = req.originalUrl.exec(regExp) || [];
+      router.route.apply(router, arguments);
+   }
+};
 module.exports = moduleExports;
