@@ -14,9 +14,18 @@ define('html!test.ParentComponent', ['doT'], function(doT){
    return doT.template(markup);
 });
 
-define('js!test.ParentComponent', ['js!BaseComponent', 'html!test.ParentComponent', 'js!test.Component'], function(BaseComponent, doTfn){
-   return BaseComponent.extend({
-      _dotTplFn: doTfn
+define('js!test.ParentComponent', ['js!CompoundComponent', 'html!test.ParentComponent', 'js!test.Component'], function(CompoundComponent, doTfn){
+   return CompoundComponent.extend({
+      _dotTplFn: doTfn,
+      getChildControlsCount: function(){
+         var count = 0;
+         for (var i in this._components){
+            if (this._components.hasOwnProperty(i)){
+               count++;
+            }
+         }
+         return count;
+      }
    });
 });
 
@@ -85,7 +94,7 @@ define(['js!utils', 'js!test.Component', 'js!test.ParentComponent'], function(ut
 
    describe('nestedMarkup', function(){
       var markup = '\
-      <component id="4224" data-component="test.ParentComponent">\
+      <component id="4224" data-component="test.ParentComponent" class="some-class" some-attr="attrValue">\
          <content type="html">\
             <component data-component="test.Component">\
                 <value>42</value>\
@@ -94,8 +103,7 @@ define(['js!utils', 'js!test.Component', 'js!test.ParentComponent'], function(ut
       </component>\
       ';
 
-      var
-         result = parentConstr.prototype._prepareMarkup.apply(parentConstr.prototype, [markup]),
+      var result = parentConstr.prototype._prepareMarkup.apply(parentConstr.prototype, [markup]),
          elem = document.createElement('div');
 
       elem.innerHTML = result;
@@ -120,6 +128,17 @@ define(['js!utils', 'js!test.Component', 'js!test.ParentComponent'], function(ut
             child  = elem.getElementsByClassName('test-Component')[0];
 
          expect(parent.getAttribute('id')).toEqual(child.getAttribute('data-pid'))
+      });
+      it('additionalAttr', function(){
+         expect(elem.getElementsByClassName('test-ParentComponent')[0].getAttribute('some-attr')).toEqual('attrValue');
+      });
+      it('class', function(){
+         expect(elem.getElementsByClassName('test-ParentComponent')[0].getAttribute('class')).toEqual('some-class test-ParentComponent')
+      });
+
+      it('_components', function(){
+         var c = new parentConstr(elem.getElementsByClassName('test-ParentComponent')[0]);
+         expect(c.getChildControlsCount()).toEqual(1);
       });
    });
 });

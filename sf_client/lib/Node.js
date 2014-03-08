@@ -10,6 +10,9 @@ define('js!Node', function(){
       this.childNodes = cfg.childNodes;
       this.parentNode = cfg.parentNode;
       this.text       = cfg.text;
+
+      this._document  = !!cfg.document;
+      this.documentElement = undefined;
    };
 
    Node.prototype.getAttribute = function(attributeName){
@@ -47,6 +50,10 @@ define('js!Node', function(){
          }
       }
       return result;
+   };
+
+   Node.prototype.isDocument = function(){
+      return this._document;
    };
 
    return Node;

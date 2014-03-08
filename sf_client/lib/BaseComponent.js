@@ -1,6 +1,10 @@
 define('js!BaseComponent', ['js!utils', 'js!Abstract', 'js!dom'], function(utils, Abstract, dom){
 
-   var global = (function(){return this || (0,eval)('this')})();
+   var
+      dataComponent = /data-component=('|")([^'"]*)\1/,
+      hasClass = /^<[a-z][a-z0-9]*[^>]*?class=('|")/,
+      tagStart = /^<[a-z][a-z0-9]*/,
+      global = (function(){return this || (0,eval)('this')})();
    global.require = require;
 
    return Abstract.extend({
@@ -59,11 +63,12 @@ define('js!BaseComponent', ['js!utils', 'js!Abstract', 'js!dom'], function(utils
             componentType = '',
             options = {},
             constructor = null,
-            parsedOptions = {};
+            parsedOptions = {},
+            xmlObject;
 
          try{
             //try to parse component type
-            componentType = /data-component=('|")([^'"]*)\1/.exec(markup)[2];
+            componentType = dataComponent.exec(markup)[2];
             //get constructor
             constructor = global.require('js!' + componentType);
          }
@@ -71,24 +76,49 @@ define('js!BaseComponent', ['js!utils', 'js!Abstract', 'js!dom'], function(utils
             throw new Error('can`t resolve component type. Markup: \n' + markup);
          }
 
+         function pushAttr(attrs, name, value){
+            attrs.push({name: name, value: value});
+         }
+
          if (constructor){
             if (typeof constructor.prototype._dotTplFn == 'function'){
+               xmlObject = dom.parse(markup).documentElement;
+
+               var attributes = xmlObject.attributes;
+
                //parse configuration
-               parsedOptions = utils.parseMarkup(markup);
+               parsedOptions = utils.parseMarkup(xmlObject);
                utils.extend(true, options, constructor.prototype._options, parsedOptions);
 
                markup = this._buildMarkup(constructor.prototype._dotTplFn, options);
 
-               //append important attributes
-               markup = markup.replace(/^<\/?[a-z][a-z0-9]*/, function(start){
-                  var attributes = " config='"+ utils.encodeConfig(parsedOptions) +"' hasmarkup='true' ";
-                  if (options.id){
-                     attributes += ("id='"+ options.id +"' ")
+               //prepare attributes
+               var attrStr = '';
+               if (options.id){
+                  pushAttr(attributes, 'id', options.id);
+               }
+               if (parentId){
+                  pushAttr(attributes, 'data-pid', parentId);
+               }
+               pushAttr(attributes, 'config', utils.encodeConfig(parsedOptions));
+               pushAttr(attributes, 'hasmarkup', 'true');
+
+               for (var i = 0, l = attributes.length; i < l; i++){
+                  var a = attributes[i];
+                  if (a.name == 'class'){
+                     if (hasClass.test(markup)){
+                        markup = markup.replace(hasClass, function(start){
+                           return start + a.value + ' ';
+                        });
+                        continue;
+                     }
                   }
-                  if (parentId){
-                     attributes += ("data-pid='"+ parentId +"' ");
-                  }
-                  return start + attributes;
+                  attrStr += (' ' + a.name + "='"+ a.value +"'");
+               }
+
+               //append attributes
+               markup = markup.replace(tagStart, function(start){
+                  return start + attrStr;
                })
             }
          }

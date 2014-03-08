@@ -330,21 +330,13 @@ define('js!utils', ['js!dom'], function(dom){
 
    /**
     * Parse configuration from html element declaration
-    * @param {HTMLElement} markup HTMLElement contained config declared by html
+    * @param {Object} xmlObject faked xmlElement
     * @returns {Object}
     */
-   utils.parseMarkup = function(markup){
+   utils.parseMarkup = function(xmlObject){
       var
-         xmlObject = dom.parse(markup),
          obj,
          childNodes;
-
-      for (var cI = 0, cL = xmlObject.childNodes.length; cI < cL; cI++){
-         if (xmlObject.childNodes[cI].nodeType == 1){
-            xmlObject = xmlObject.childNodes[cI];
-            break;
-         }
-      }
 
       obj = utils.parseOptions(xmlObject);
 

@@ -1,4 +1,4 @@
-define(['js!utils'], function(utils){
+define(['js!utils', 'js!dom'], function(utils, dom){
 
    describe('parseMarkup', function() {
 
@@ -11,9 +11,10 @@ define(['js!utils'], function(utils){
                             <null>null</null>\
                             <undefined>undefined</undefined>\
                          </component>',
+            xmlObject = dom.parse(innerHTML).documentElement,
             res;
 
-         res = utils.parseMarkup(innerHTML);
+         res = utils.parseMarkup(xmlObject);
 
          expect(res).toEqual({
             id: '1',
@@ -36,9 +37,10 @@ define(['js!utils'], function(utils){
                            <undefined>undefined</undefined>\
                         </arr>\
                      </component>',
+            xmlObject = dom.parse(xml).documentElement,
             res;
 
-         res = utils.parseMarkup(xml);
+         res = utils.parseMarkup(xmlObject);
 
          expect(res.arr).toEqual([
             'bar',
@@ -59,9 +61,10 @@ define(['js!utils'], function(utils){
                           <undefined>undefined</undefined>\
                        </obj>\
                     </component>',
+            xmlObject = dom.parse(xml).documentElement,
             res;
 
-         res = utils.parseMarkup(xml);
+         res = utils.parseMarkup(xmlObject);
 
          expect(res.obj).toEqual({
             'foo': 'bar',
@@ -76,9 +79,10 @@ define(['js!utils'], function(utils){
          var xml = '<component name="test">\
                        <obj type="object" foo="bar" num="42" bool="false" null="null" undefined="undefined"></obj>\
                     </component>',
+            xmlObject = dom.parse(xml).documentElement,
             res;
 
-         res = utils.parseMarkup(xml);
+         res = utils.parseMarkup(xmlObject);
 
          expect(res.obj).toEqual({
             'type': 'object',
@@ -103,9 +107,10 @@ define(['js!utils'], function(utils){
                           <obj type="object" foo="bar" num="42" bool="false" null="null" undefined="undefined"></o>\
                        </obj>\
                     </component>',
+            xmlObject = dom.parse(xml).documentElement,
             res;
 
-         res = utils.parseMarkup(xml);
+         res = utils.parseMarkup(xmlObject);
 
          expect(res.obj).toEqual({
             'arr': [
@@ -133,6 +138,46 @@ define(['js!utils'], function(utils){
          });
       });
 
+      it('parseMarkup.complicatedMarkup', function() {
+         var xml = '<component id="123" data-component="docs.Sidebar" name="menu">\
+                        <activeLink>/qs/example</activeLink>\
+                        <items type="array">\
+                           <o type="object">\
+                              <caption>Quick start</caption>\
+                              <submenu type="array">\
+                                 <o type="object" caption="Install" href="/qs/install"></o>\
+                                 <o type="object" caption="Usage" href="/qs/example"></o>\
+                              </submenu>\
+                           </o>\
+                        </items>\
+                     </component>',
+            xmlObject = dom.parse(xml).documentElement,
+            res;
+
+         res = utils.parseMarkup(xmlObject);
+         expect(res).toEqual({
+            "name": "menu",
+            "id": "123",
+            "activeLink": "/qs/example",
+            "items": [
+               {
+                  "caption": "Quick start",
+                  "submenu": [
+                     {
+                        "type": "object",
+                        "caption": "Install",
+                        "href": "/qs/install"
+                     },
+                    {
+                       "type": "object",
+                       "caption": "Usage",
+                       "href": "/qs/example"
+                    }
+                  ]
+               }
+            ]});
+      });
+
       it('parseMarkup.parseAttr', function() {
          var
             markup,
@@ -143,10 +188,12 @@ define(['js!utils'], function(utils){
                'html': '<a href="/">that link contains \'quot\' and "double quot"</a>',
                'html2': "<a href='/'>that link contains 'quot' and \"double quot\"</a>"
             },
+            xmlObject,
             res;
 
          markup = "<component id='2' config='"+ utils.encodeConfig(cfg) +"' />";
-         res = utils.parseMarkup(markup);
+         xmlObject = dom.parse(markup).documentElement;
+         res = utils.parseMarkup(xmlObject);
 
          expect(res).toEqual({
             'id': '2',
