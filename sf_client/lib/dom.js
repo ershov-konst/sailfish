@@ -47,6 +47,7 @@ define('js!dom', ['js!Node'], function(Node){
       var
          tags = markup instanceof Array ? markup : markup.match(tagRegExp),
          result = new Node({
+            document : true,
             childNodes: [],
             parentNode: null
          }),
@@ -78,6 +79,10 @@ define('js!dom', ['js!Node'], function(Node){
                parentNode: currentObject,
                startTag: tag
             }));
+
+            if (currentObject.isDocument() && !currentObject.documentElement){
+               currentObject.documentElement = buffer;
+            }
             if (!selfClose.test(tag)){
                currentObject = buffer;
             }
