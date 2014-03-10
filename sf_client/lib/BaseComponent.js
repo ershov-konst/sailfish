@@ -49,6 +49,7 @@ define('js!BaseComponent', ['js!utils', 'js!Abstract', 'js!dom'], function(utils
             }
 
             this._container = buffer;
+            this._container.removeAttribute('config');
          }
       },
       container : function(){
