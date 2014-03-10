@@ -32,7 +32,6 @@ define('js!utils', ['js!dom'], function(dom){
       return !isNaN(parseFloat(n)) && isFinite(n);
    }
 
-
    function parseElem(elem){
       var result;
 
@@ -338,7 +337,7 @@ define('js!utils', ['js!dom'], function(dom){
          obj,
          childNodes;
 
-      obj = utils.parseOptions(xmlObject);
+      obj = utils.parseConfigAttr(xmlObject);
 
       obj.name = xmlObject.getAttribute('name') || obj.name || '';
       obj.id   = xmlObject.getAttribute('id')   || obj.id   || utils.generateId();
@@ -364,7 +363,7 @@ define('js!utils', ['js!dom'], function(dom){
       return obj;
    };
 
-   utils.parseOptions = function(container){
+   utils.parseConfigAttr = function(container){
       var result = {};
       try{
          result = utils.decodeConfig(container.getAttribute('config') || '{}');
@@ -389,6 +388,71 @@ define('js!utils', ['js!dom'], function(dom){
 
    utils.encodeConfig = function(json){
       return encodeURIComponent(JSON.stringify(json)).replace(/'/g, '&quot;');
+   };
+
+   function getStr(v, storage){
+      var result = '';
+      if (v instanceof Array){
+         if (!v.length){
+            result = '[]';
+         }
+         else{
+            result = '[';
+            for (var i = 0, l = v.length; i < l; i++){
+               result += getStr(v[i], storage);
+            }
+            result += ']';
+         }
+      }
+      else if (Object.prototype.toString.call(v) == '[object Object]'){
+         result = '{';
+         var firstProperty = true;
+         for (var n in v){
+            if (v.hasOwnProperty(n)){
+               if (!firstProperty){
+                  result += ',';
+               }
+               else{
+                  firstProperty = false;
+               }
+               result += '"' + n + '":' + getStr(v[n], storage);
+            }
+         }
+         result += '}';
+      }
+      else if (v instanceof Date){
+         result = 'new Date('+ (+v) +')';
+      }
+      else if (v instanceof RegExp){
+         var flags =
+            (v.multiline  ? 'm' : '') +
+            (v.global     ? 'g' : '') +
+            (v.ignoreCase ? 'i' : '');
+
+         result = 'new RegExp("'+ v.source +'","'+ flags +'")'
+      }
+      else if (typeof(v) == 'function'){
+         result = 'this.storage[' + storage.length + ']';
+         storage.push(v);
+      }
+      else if (typeof(v) == 'string'){
+         result = '"' + v + '"';
+      }
+      else {
+         result = '' + v;
+      }
+      return result;
+   }
+
+   utils.deepCopyFn = function(toCopy){
+      var
+         context = {
+            storage : []
+         },
+         fn = new Function('return ' + getStr(toCopy, context.storage) + ';');
+      return function(){
+         return fn.apply(context, arguments);
+      }
    };
 
    return utils;

@@ -1,11 +1,13 @@
 define("js!Abstract", ["js!utils", "js!Class", "js!EventBus"], function (utils, Class, EventBus) {
 
    return Class.extend({
-      _id : null,
+      _options: {
+         id : ''
+      },
       _eventChannel : null,
 
       init : function(){
-         this._id = utils.generateId();
+         this._options.id = this._options.id || utils.generateId();
          this._eventChannel = EventBus.channel(this._id);
       },
       trigger : function(type, target){
@@ -21,7 +23,7 @@ define("js!Abstract", ["js!utils", "js!Class", "js!EventBus"], function (utils, 
          this._eventChannel.has(type, callback, scope);
       },
       getId : function(){
-         return this._id;
+         return this._options.id;
       },
       destroy : function(){
          EventBus.removeChannel(this._id);

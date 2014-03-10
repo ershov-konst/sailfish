@@ -1,4 +1,4 @@
-define("js!Class", ["js!utils"], function (core) {
+define("js!Class", ["js!utils"], function (utils) {
    /* Simple JavaScript Inheritance
     * By John Resig http://ejohn.org/
     * MIT Licensed.
@@ -41,15 +41,18 @@ define("js!Class", ["js!utils"], function (core) {
                   return ret;
                };
             })(name, prop[name]) :
-            name == "_options" ? core.extend(true, this.prototype[name], prop[name]) : prop[name];
+            name == "_options" ? utils.extend(true, {}, this.prototype[name], prop[name]) : prop[name];
       }
+
+      prototype.__getDefaultOptions = utils.deepCopyFn(prototype._options);
 
       // The dummy class constructor
       function Class() {
          // All construction is actually done in the init method
          if (!initializing && this.init){
-            if ("_options" in this && core.type(arguments[0]) === "object"){
-               this._options = core.extend(true, this._options, arguments[0]);
+            if ("_options" in this && utils.type(arguments[0]) === "object"){
+               var b = this.__getDefaultOptions();
+               this._options = utils.extend(true, b, arguments[0]);
             }
             this.init.apply(this, arguments);
          }

@@ -19,7 +19,7 @@ define('js!BaseComponent', ['js!utils', 'js!Abstract', 'js!dom'], function(utils
 
          switch (utils.type(cfg)){
             case 'element':
-               utils.extend(true, this._options, utils.parseOptions(cfg));
+               utils.extend(true, this._options, utils.parseConfigAttr(cfg));
                this._container = cfg;
                break;
             case 'object':

@@ -5,7 +5,26 @@ define('html!test.Component', ['doT'], function(doT){
 
 define('js!test.Component', ['js!BaseComponent', 'html!test.Component'], function(BaseComponent, doTfn){
    return BaseComponent.extend({
-      _dotTplFn: doTfn
+      _array: [],
+      _options : {
+         value : 1,
+         array: []
+      },
+      _dotTplFn: doTfn,
+      init: function(cfg){
+         this._super(cfg);
+         this._array.push(1);
+         this._options.array.push(1);
+      },
+      getValue: function(){
+         return this._options.value;
+      },
+      getPropertyArrayLength: function(){
+         return this._array.length;
+      },
+      getOptionArrayLength: function(){
+         return this._options.array.length;
+      }
    });
 });
 
@@ -139,6 +158,28 @@ define(['js!utils', 'js!test.Component', 'js!test.ParentComponent'], function(ut
       it('_components', function(){
          var c = new parentConstr(elem.getElementsByClassName('test-ParentComponent')[0]);
          expect(c.getChildControlsCount()).toEqual(1);
+      });
+   });
+
+   describe('overwritingOptions', function(){
+      var
+         a = new constr({value: 1}),
+         b = new constr({value: 2});
+
+      //todo: improve inheritance for protection non-function properties
+      /*it('hardTypeProperty', function(){
+         expect(a.getPropertyArrayLength()).toEqual(1);
+         expect(b.getPropertyArrayLength()).toEqual(1);
+      });*/
+
+      it('simpleTypeOption', function(){
+         expect(a.getValue()).toEqual(1);
+         expect(b.getValue()).toEqual(2);
+      });
+
+      it('hardTypeOption', function(){
+         expect(a.getOptionArrayLength()).toEqual(1);
+         expect(b.getOptionArrayLength()).toEqual(1);
       });
    });
 });
