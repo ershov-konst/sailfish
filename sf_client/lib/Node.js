@@ -6,6 +6,7 @@ define('js!Node', function(){
 
       this.nodeType   = cfg.nodeType;
       this.nodeName   = cfg.nodeName;
+      this.namespace  = cfg.namespace || null;
       this.attributes = cfg.attributes || [];
       this.childNodes = cfg.childNodes;
       this.parentNode = cfg.parentNode;

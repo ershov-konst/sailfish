@@ -1,13 +1,13 @@
 define('js!dom', ['js!Node'], function(Node){
    var
-      tagRegExp = /(<\/?[a-z][a-z0-9]*\s*(?:\s+[a-z0-9-_]+=(?:(?:'.*?')|(?:".*?")))*\s*\/?>)|([^<]|<(?![a-z\/]))*/gi,
+      tagRegExp = /(<\/?[a-z][a-z0-9]*(?::[a-z][a-z0-9]*)?\s*(?:\s+[a-z0-9-_]+=(?:(?:'.*?')|(?:".*?")))*\s*\/?>)|([^<]|<(?![a-z\/]))*/gi,
       attrRegExp = /\s[a-z0-9-_]+\b(=('|").*?\2)?/gi,
       startComponent = /^<component/,
       endComponent = /^<\/component>/,
       startTag = /^<[a-z]/,
       selfClose = /\/>$/,
       closeTag = /^<\//,
-      nodeName = /<([a-z][a-z0-9]*)/i,
+      nodeName = /<([a-z][a-z0-9]*)(?::([a-z][a-z0-9]*))?/i,
       attributeQuotes = /(^'|")|('|")$/g;
 
    function replaceComponents(markup, fn){
@@ -54,12 +54,14 @@ define('js!dom', ['js!Node'], function(Node){
          buffer,
          currentObject = result,
          tag,
+         fullNodeName,
          attrBuffer = [],
          attrStr = [],
          attributes = [];
 
       for (var i = 0, l = tags.length; i < l; i++){
          tag = tags[i];
+         fullNodeName = tag.match(nodeName);
 
          if (startTag.test(tag)){
             attributes = [];
@@ -73,7 +75,8 @@ define('js!dom', ['js!Node'], function(Node){
             }
             currentObject.childNodes.push(buffer = new Node({
                nodeType: 1, //element node
-               nodeName : tag.match(nodeName)[1],
+               nodeName : fullNodeName[1],
+               namespace : fullNodeName[2],
                attributes: attributes,
                childNodes: [],
                parentNode: currentObject,

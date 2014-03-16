@@ -40,9 +40,9 @@ define('js!utils', ['js!dom'], function(dom){
          result = /\S/.test(elem.text) ? {name : 'content', value : elem.text} : false;
       }
       else {
-         if (/Object|object|Array|array/.test(elem.getAttribute('type'))){
+         if (/Object|object|Array|array/.test(elem.namespace)){
             var
-               isArray = /Array|array/.test(elem.getAttribute('type')),
+               isArray = /Array|array/.test(elem.namespace),
                res = isArray ? [] : {},
                childRes,
                childNodes = elem.childNodes;
@@ -74,7 +74,7 @@ define('js!utils', ['js!dom'], function(dom){
                'value': res
             }
          }
-         else if (/HTML|html/.test(elem.getAttribute('type'))){
+         else if (/HTML|html/.test(elem.namespace)){
             result = {name : elem.nodeName, value : elem.innerHTML()};
          }
          else{
