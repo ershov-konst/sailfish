@@ -17,6 +17,7 @@
 			defineParams:/^\s*([\w$]+):([\s\S]+)/,
 			conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g,
 			iterate:     /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g,
+			ref:         /\{\{@([\s\S]+?)\}\}/g,
 			varname:	'it',
 			strip:		true,
 			append:		true,
@@ -92,6 +93,9 @@
 		str = ("var out='" + (c.strip ? str.replace(/(^|\r|\n)\t* +| +\t*(\r|\n|$)/g,' ')
 					.replace(/\r|\n|\t|\/\*[\s\S]*?\*\//g,''): str)
 			.replace(/'|\\/g, '\\$&')
+         .replace(c.ref || skip, function(m, code){
+            return cse.start + '(function(s, v){return s.push(v) - 1;}(this.storage, '+ unescape(code) +'))' + cse.end;
+         })
 			.replace(c.interpolate || skip, function(m, code) {
 				return cse.start + unescape(code) + cse.end;
 			})

@@ -32,7 +32,7 @@ define('js!utils', ['js!dom'], function(dom){
       return !isNaN(parseFloat(n)) && isFinite(n);
    }
 
-   function parseElem(elem){
+   function parseElem(elem, vStorage){
       var result;
 
       if (elem.nodeType === 3){ //TEXT_NODE
@@ -54,7 +54,7 @@ define('js!utils', ['js!dom'], function(dom){
             }
 
             for (var i = 0, l = childNodes.length; i < l; i++){
-               if ((childRes = parseElem(childNodes[i])) !== false){
+               if ((childRes = parseElem(childNodes[i], vStorage)) !== false){
                   if (isArray){
                      res.push(childRes.value);
                   }
@@ -76,6 +76,12 @@ define('js!utils', ['js!dom'], function(dom){
          }
          else if (/HTML|html/.test(elem.namespace)){
             result = {name : elem.nodeName, value : elem.innerHTML()};
+         }
+         else if (/ref/.test(elem.namespace)){
+            result = {
+               name: elem.nodeName,
+               value: vStorage.storage[parseInt(elem.innerHTML(), 10)]
+            }
          }
          else{
             var
@@ -330,9 +336,10 @@ define('js!utils', ['js!dom'], function(dom){
    /**
     * Parse configuration from html element declaration
     * @param {Object} xmlObject faked xmlElement
+    * @param {Object} [vStorage]
     * @returns {Object}
     */
-   utils.parseMarkup = function(xmlObject){
+   utils.parseMarkup = function(xmlObject, vStorage){
       var
          obj,
          childNodes;
@@ -346,7 +353,7 @@ define('js!utils', ['js!dom'], function(dom){
          childNodes = xmlObject.childNodes;
          if (childNodes.length){
             for (var i = 0, l = childNodes.length; i < l; i++){
-               var field = parseElem(childNodes[i]);
+               var field = parseElem(childNodes[i], vStorage);
                if (field){
                   if (field.name == 'content'){
                      obj.content = obj.content || '';

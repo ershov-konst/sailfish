@@ -59,7 +59,7 @@ define('js!BaseComponent', ['js!utils', 'js!Abstract', 'js!dom'], function(utils
          return this._options.name;
       },
 
-      _prepareMarkup: function(markup, parentId){
+      _prepareMarkup: function(markup, parentId, vStorage){
          var
             componentType = '',
             options = {},
@@ -88,10 +88,10 @@ define('js!BaseComponent', ['js!utils', 'js!Abstract', 'js!dom'], function(utils
                var attributes = xmlObject.attributes;
 
                //parse configuration
-               parsedOptions = utils.parseMarkup(xmlObject);
+               parsedOptions = utils.parseMarkup(xmlObject, vStorage);
                utils.extend(true, options, constructor.prototype._options, parsedOptions);
 
-               markup = this._buildMarkup(constructor.prototype._dotTplFn, options);
+               markup = this._buildMarkup(constructor.prototype._dotTplFn, options, vStorage);
 
                //prepare attributes
                var attrStr = '';
@@ -126,16 +126,17 @@ define('js!BaseComponent', ['js!utils', 'js!Abstract', 'js!dom'], function(utils
 
          return markup;
       },
-      _buildMarkup: function(dotTplFn, options){
+      _buildMarkup: function(dotTplFn, options, vStorage){
          var
             self = this,
             markup;
 
+         vStorage = vStorage || {storage: []};
          //create markup
-         markup = dotTplFn(options);
+         markup = dotTplFn.apply(vStorage, [options]);
          //inline inner components
          return dom.replaceComponents(markup, function(componentStr){
-            return self._prepareMarkup(componentStr, options.id);
+            return self._prepareMarkup(componentStr, options.id, vStorage);
          });
       },
       _hasMarkup: function(container){
