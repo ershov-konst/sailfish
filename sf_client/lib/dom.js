@@ -1,14 +1,15 @@
 define('js!dom', ['js!Node'], function(Node){
    var
-      tagRegExp = /(<\/?[a-z][a-z0-9]*(?::[a-z][a-z0-9]*)?\s*(?:\s+[a-z0-9-_]+=(?:(?:'.*?')|(?:".*?")))*\s*\/?>)|([^<]|<(?![a-z\/]))*/gi,
-      attrRegExp = /\s[a-z0-9-_]+\b(=('|").*?\2)?/gi,
+      tagRegExp = /(<\/?[a-z][a-z0-9]*(?::[a-z][a-z0-9]*)?\s*(?:\s+[a-z0-9-_]+=(?:(?:'[\s\S]*?')|(?:"[\s\S]*?")))*\s*\/?>)|([^<]|<(?![a-z\/]))*/gi,
+      attrRegExp = /\s[a-z0-9-_]+\b(\s*=\s*('|")[\s\S]*?\2)?/gi,
       startComponent = /^<component/,
       endComponent = /^<\/component>/,
       startTag = /^<[a-z]/,
       selfClose = /\/>$/,
       closeTag = /^<\//,
       nodeName = /<([a-z][a-z0-9]*)(?::([a-z][a-z0-9]*))?/i,
-      attributeQuotes = /(^'|")|('|")$/g;
+      attributeQuotes = /^('|")|('|")$/g,
+      trim = /^\s*|\s*$/g;
 
    function replaceComponents(markup, fn){
       var
@@ -69,8 +70,8 @@ define('js!dom', ['js!Node'], function(Node){
             for (var aI = 0, aL = attrStr.length; aI < aL; aI++){
                attrBuffer = attrStr[aI].split('=');
                attributes.push({
-                  name: attrBuffer[0].replace(/^\s/, ''),
-                  value: (attrBuffer[1] || '').replace(attributeQuotes, '')
+                  name: attrBuffer[0].replace(trim, ''),
+                  value: (attrBuffer[1] || '').replace(trim, '').replace(attributeQuotes, '')
                });
             }
             currentObject.childNodes.push(buffer = new Node({

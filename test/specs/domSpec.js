@@ -2,7 +2,8 @@ define(['js!dom'], function(dom){
 
    describe('configFromXML', function() {
       var
-         xml = '<component name="test0" data-component="test1" singleQuote=\'test2\'>\
+         xml = '<component name="test0" data-component = "test1" singleQuote=\'test2\' multiline="multi \n\
+line">\
                      <foo>bar</foo>\
                      <num>42</num>\
                      <bool>false</bool>\
@@ -57,16 +58,17 @@ define(['js!dom'], function(dom){
             attrs = component.attributes,
             result = {};
 
-         for (var i in attrs){
-            if (attrs.hasOwnProperty(i)){
-               result[i] = component.getAttribute(i);
-            }
+         for (var i = 0, l = attrs.length; i< l; i++){
+            result[attrs[i].name] = component.getAttribute(attrs[i].name);
+
          }
 
-         expect(result, {
+         expect(result).toEqual({
             "name" : "test0",
             "data-component" : "test1",
-            "singleQuote" : "test2"
+            "singleQuote" : "test2",
+            "multiline" : "multi \n\
+line"
          });
       });
    });
