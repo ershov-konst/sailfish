@@ -1,4 +1,9 @@
-define(['js!utils', 'js!dom'], function(utils, dom){
+define('js!test.package', {
+   handler: function(){
+      alert(1);
+   }
+});
+define(['js!utils', 'js!dom', 'js!test.package'], function(utils, dom){
 
    describe('parseMarkup', function() {
 
@@ -130,6 +135,18 @@ define(['js!utils', 'js!dom'], function(utils, dom){
                'undefined': undefined
             }
          });
+      });
+
+      it('parseMarkup.fn', function(){
+         var xml = '<component name="test">\
+                       <handler:fn>js!test.package:handler</handler>\
+                    </component>',
+            xmlObject = dom.parse(xml).documentElement,
+            res;
+
+         res = utils.parseMarkup(xmlObject);
+
+         expect(res.handler === require('js!test.package')['handler']).toBeTruthy();
       });
 
       it('parseMarkup.complicatedMarkup', function() {

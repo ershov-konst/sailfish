@@ -77,10 +77,23 @@ define('js!utils', ['js!dom'], function(dom){
          else if (/HTML|html/.test(elem.namespace)){
             result = {name : elem.nodeName, value : elem.innerHTML()};
          }
+         else if (/fn/.test(elem.namespace)){
+            result = {name: elem.nodeName, value: getFnFromDeclaration(elem.innerHTML())}
+         }
          else if (/ref/.test(elem.namespace)){
+            var
+               id = utils.generateId(),
+               v = vStorage.storage[parseInt(elem.innerHTML(), 10)];
+
+            if (typeof v == 'function'){
+               v.__decl = '__fnDecl::' + id;
+               v.toJSON = toJSON;
+               fnStorage[id] = v;
+            }
+
             result = {
                name: elem.nodeName,
-               value: vStorage.storage[parseInt(elem.innerHTML(), 10)]
+               value: v
             }
          }
          else{
@@ -105,6 +118,65 @@ define('js!utils', ['js!dom'], function(dom){
       return result;
    }
 
+   var fnStorage = {};
+
+   /**
+    * This function uses with JSON.parse
+    * @param key
+    * @param value
+    * @returns {*}
+    */
+   var jsonReviver = (function () {
+      var
+         fnModuleDecl = /^__fnModuleDecl::/,
+         fnDecl = /^__fnDecl::/;
+
+      return function(key, value){
+         if (typeof value == 'string') {
+
+            if (fnModuleDecl.test(value)) {
+               return getFnFromDeclaration(value.replace(fnModuleDecl, ''));
+            }
+            if (fnDecl.test(value)) {
+               return getFnFromStorage(value.replace(fnDecl, ''));
+            }
+         }
+         return value;
+      }
+   }());
+
+   function toJSON(){
+      return this.__decl;
+   }
+
+   function getFnFromDeclaration(decl){
+      var
+         paths = decl.split(':'),
+         result,
+         p;
+
+      try{
+         result = require(paths[0]);
+         if (paths[1]){
+            paths = paths[1].split('.');
+            while(p = paths.shift()){
+               result = result[p];
+            }
+            result.__decl = '__fnModuleDecl::' + decl;
+            result.toJSON = toJSON;
+         }
+      }
+      catch(e){
+         throw new Error('Parsing function declaration "' + decl + '" failed. Original message: ' + e.message);
+      }
+      return result;
+   }
+
+   function getFnFromStorage(decl){
+      var result = fnStorage[decl];
+      delete fnStorage[decl];
+      return result;
+   }
 
    /**
     * Basic tools for working framework
@@ -385,7 +457,7 @@ define('js!utils', ['js!dom'], function(dom){
       var result;
 
       try{
-         result = JSON.parse(decodeURIComponent(encodedCfg.replace(/&quot;|"/g,'\'')));
+         result = JSON.parse(decodeURIComponent(encodedCfg.replace(/&quot;|"/g,'\'')), jsonReviver);
       }
       catch(e){
          throw new Error("Ошибка разбор конфигурации для компонента");
