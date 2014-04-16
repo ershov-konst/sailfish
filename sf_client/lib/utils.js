@@ -561,14 +561,6 @@ define('js!utils', ['js!dom'], function(dom){
       else if (v instanceof Date){
          result = 'new Date('+ (+v) +')';
       }
-      else if (v instanceof RegExp){
-         var flags =
-            (v.multiline  ? 'm' : '') +
-            (v.global     ? 'g' : '') +
-            (v.ignoreCase ? 'i' : '');
-
-         result = 'new RegExp("'+ v.source +'","'+ flags +'")'
-      }
       else if (typeof(v) == 'function'){
          result = 'this.storage[' + storage.length + ']';
          storage.push(v);
