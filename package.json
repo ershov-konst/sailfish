@@ -18,10 +18,10 @@
     },
     "description": "sailfish - это фремфорк для создания web-приложений на JavaScript. Фреймворк является самодостаточным, т.е содержит в себе как серверную так и клиентскую части.",
     "devDependencies": {
-      "karma": "0.10.x"
+      "karma": "0.12.x"
     },
     "scripts": {
-        "test": "./node_modules/.bin/karma start"
+        "test": "./node_modules/karma/bin/karma start"
     },
     "repository": {
         "type": "git",
