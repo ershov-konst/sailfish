@@ -1,36 +1,40 @@
 {
-    "name": "sailfish",
-    "version": "0.0.12",
-    "main": "./index.js",
-    "bin": {
-        "sailfish": "./bin/sailfish"
-    },
-    "dependencies": {
-        "commander": "2.2.x",
-        "walk": "2.3.x",
-        "async": "0.7.x",
-        "node.extend": "1.0.x",
-        "dot": "1.0.x",
-        "requirejs": "2.1.x",
-        "less-middleware": "0.1.x",
-        "less": "1.7.x",
-        "mkdirp": "0.3.x"
-    },
-    "description": "sailfish - это фремфорк для создания web-приложений на JavaScript. Фреймворк является самодостаточным, т.е содержит в себе как серверную так и клиентскую части.",
-    "devDependencies": {
-      "karma": "0.12.x"
-    },
-    "scripts": {
-        "test": "./node_modules/karma/bin/karma start"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/ershov-konst/sailfish"
-    },
-    "author": "Konstantin Ershov",
-    "license": "BSD-2-Clause",
-    "bugs": {
-        "url": "https://github.com/ershov-konst/sailfish/issues"
-    },
-    "homepage": "https://github.com/ershov-konst/sailfish"
+  "name": "sailfish",
+  "version": "0.0.12",
+  "main": "./index.js",
+  "bin": {
+    "sailfish": "./bin/sailfish"
+  },
+  "dependencies": {
+    "commander": "2.2.x",
+    "walk": "2.3.x",
+    "async": "0.7.x",
+    "node.extend": "1.0.x",
+    "dot": "1.0.x",
+    "requirejs": "2.1.x",
+    "less-middleware": "0.1.x",
+    "less": "1.7.x",
+    "mkdirp": "0.3.x"
+  },
+  "description": "sailfish - это фремфорк для создания web-приложений на JavaScript. Фреймворк является самодостаточным, т.е содержит в себе как серверную так и клиентскую части.",
+  "devDependencies": {
+    "karma": "0.12.x",
+    "karma-chrome-launcher": "~0.1.3",
+    "karma-jasmine": "~0.1.5",
+    "karma-requirejs": "~0.2.1",
+    "karma-phantomjs-launcher": "~0.1.4"
+  },
+  "scripts": {
+    "test": "./node_modules/karma/bin/karma start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ershov-konst/sailfish"
+  },
+  "author": "Konstantin Ershov",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/ershov-konst/sailfish/issues"
+  },
+  "homepage": "https://github.com/ershov-konst/sailfish"
 }
