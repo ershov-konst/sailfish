@@ -2,7 +2,25 @@
  * @module js!utils
  */
 define('js!utils', ['js!dom'], function(dom){
+   var
+      /**
+       * Storage for store functions that was converted to string
+       * @type {{}}
+       */
+      fnStorage = {},
+      /**
+       * Basic tools for working framework
+       *
+       * **Module returns**: `js!utils`
+       * @namespace {Object} utils
+       */
+      utils = {};
 
+   /**
+    * Convert string value to right type
+    * @param {String} value
+    * @returns {String|Boolean|null|undefined}
+    */
    function resolveType(value){
 
       if (stringIsNumber(value)){
@@ -28,10 +46,22 @@ define('js!utils', ['js!dom'], function(dom){
       return value;
    }
 
+   /**
+    * check by number
+    * @param {String} n
+    * @returns {boolean}
+    */
    function stringIsNumber(n) {
       return !isNaN(parseFloat(n)) && isFinite(n);
    }
 
+   /**
+    * function for parsing element of pseudo DOM
+    * used by utils.parseMarkup
+    * @param elem
+    * @param vStorage
+    * @returns {*}
+    */
    function parseElem(elem, vStorage){
       var result;
 
@@ -118,37 +148,43 @@ define('js!utils', ['js!dom'], function(dom){
       return result;
    }
 
-   var fnStorage = {};
-
    /**
-    * This function uses with JSON.parse
+    * reviver
+    * used by utils.decodeConfig
     * @param key
     * @param value
     * @returns {*}
     */
-   var jsonReviver = (function () {
+   function jsonReviver(key, value) {
       var
          fnModuleDecl = /^__fnModuleDecl::/,
          fnDecl = /^__fnDecl::/;
 
-      return function(key, value){
-         if (typeof value == 'string') {
+      if (typeof value == 'string') {
 
-            if (fnModuleDecl.test(value)) {
-               return getFnFromDeclaration(value.replace(fnModuleDecl, ''));
-            }
-            if (fnDecl.test(value)) {
-               return getFnFromStorage(value.replace(fnDecl, ''));
-            }
+         if (fnModuleDecl.test(value)) {
+            return getFnFromDeclaration(value.replace(fnModuleDecl, ''));
          }
-         return value;
+         if (fnDecl.test(value)) {
+            return getFnFromStorage(value.replace(fnDecl, ''));
+         }
       }
-   }());
+      return value;
+   }
 
+   /**
+    * used for converting functions to JSON
+    * @returns {string|*}
+    */
    function toJSON(){
       return this.__decl;
    }
 
+   /**
+    * return function from module by string declaration
+    * @param {String} decl
+    * @returns {*}
+    */
    function getFnFromDeclaration(decl){
       var
          paths = decl.split(':'),
@@ -172,19 +208,18 @@ define('js!utils', ['js!dom'], function(dom){
       return result;
    }
 
+   /**
+    * return function by string declaration
+    * @param {String} decl
+    * @returns {*}
+    */
    function getFnFromStorage(decl){
       var result = fnStorage[decl];
       delete fnStorage[decl];
       return result;
    }
 
-   /**
-    * Basic tools for working framework
-    *
-    * **Module returns**: `js!utils`
-    * @namespace {Object} utils
-    */
-   var utils = {};
+
 
    /**
     * Provide inner components, returns array of instantiated components
@@ -410,6 +445,7 @@ define('js!utils', ['js!dom'], function(dom){
     * @param {Object} xmlObject faked xmlElement
     * @param {Object} [vStorage]
     * @returns {Object}
+    * @memberof utils
     */
    utils.parseMarkup = function(xmlObject, vStorage){
       var
@@ -442,6 +478,11 @@ define('js!utils', ['js!dom'], function(dom){
       return obj;
    };
 
+   /**
+    * Gets `config` attribute of container and try decode it
+    * @param container
+    * @returns {{}}
+    */
    utils.parseConfigAttr = function(container){
       var result = {};
       try{
@@ -453,6 +494,12 @@ define('js!utils', ['js!dom'], function(dom){
       return result;
    };
 
+   /**
+    * Decode string encoded by `utils.encodeConfig` to object
+    * @param {String} encodedCfg
+    * @returns {*}
+    * @memberof utils
+    */
    utils.decodeConfig = function(encodedCfg){
       var result;
 
@@ -465,10 +512,22 @@ define('js!utils', ['js!dom'], function(dom){
       return result;
    };
 
+   /**
+    * Encode object to safe string that may be passed as value to attribute
+    * @param json
+    * @returns {string}
+    * @memberof utils
+    */
    utils.encodeConfig = function(json){
       return encodeURIComponent(JSON.stringify(json)).replace(/'/g, '&quot;');
    };
 
+   /**
+    * used by `utils.deepCopyFn`
+    * @param v
+    * @param storage
+    * @returns {string}
+    */
    function getStr(v, storage){
       var result = '';
       if (v instanceof Array){
@@ -523,6 +582,12 @@ define('js!utils', ['js!dom'], function(dom){
       return result;
    }
 
+   /**
+    * Returns function that returns deep copy of `toCopy` object
+    * @param toCopy
+    * @returns {Function}
+    * @memberof utils
+    */
    utils.deepCopyFn = function(toCopy){
       var
          context = {
