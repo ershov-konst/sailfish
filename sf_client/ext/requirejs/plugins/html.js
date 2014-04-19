@@ -3,13 +3,12 @@ define(["path-resolver", "doT"], function(pr, doT){
    function loadFile(path) {
       var
          fs = require.nodeRequire('fs'),
-         dot = require.nodeRequire("dot"),
          file = fs.readFileSync(path, 'utf8');
 
       if (file.indexOf('\uFEFF') === 0)
          file = file.substring(1);
 
-      return dot.template(file);
+      return doT.template(file);
    }
 
    return {
