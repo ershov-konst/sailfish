@@ -8,13 +8,13 @@
   "dependencies": {
     "commander": "2.2.x",
     "walk": "2.3.x",
-    "async": "0.7.x",
+    "async": "0.8.x",
     "node.extend": "1.0.x",
     "dot": "1.0.x",
     "requirejs": "2.1.x",
     "less-middleware": "0.1.x",
     "less": "1.7.x",
-    "mkdirp": "0.3.x"
+    "mkdirp": "0.4.x"
   },
   "description": "sailfish - это фремфорк для создания web-приложений на JavaScript. Фреймворк является самодостаточным, т.е содержит в себе как серверную так и клиентскую части.",
   "devDependencies": {
