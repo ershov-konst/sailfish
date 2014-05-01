@@ -222,6 +222,7 @@ var moduleExports = function(expressjs, cfg){
 
 moduleExports.Sailfish = Sailfish;
 moduleExports.Component = require("./lib/Component.js");
+moduleExports.doT = require('./sf_client/ext/dot/doT.js');
 moduleExports.baseRouting = function(controllersPath){
    var
       router,
