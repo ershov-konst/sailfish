@@ -1,12 +1,11 @@
 # sailfish [![Build Status](https://travis-ci.org/ershov-konst/sailfish.png)](https://travis-ci.org/ershov-konst/sailfish) [![Dependency Status](https://david-dm.org/ershov-konst/sailfish.png?theme=shields.io)](https://david-dm.org/ershov-konst/sailfish) [![devDependency Status](https://david-dm.org/ershov-konst/sailfish/dev-status.png?theme=shields.io)](https://david-dm.org/ershov-konst/sailfish#info=devDependencies)
 
-sailfish - это фремфорк для создания web-приложений на JavaScript. Фреймворк является самодостаточным,
+sailfish - это фремворк для создания web-приложений на JavaScript. Фреймворк является самодостаточным,
 т.е содержит в себе как серверную так и клиентскую части.
 
 ## frontend
 Фреймворк позволяет разделять frontend часть приложения на отдельные компоненты. Компонент увязывает в себе разметку (html),
-её визуальное оформление (css) и поведение(js). Понятие компонент сопоставимо с понятием "блок" в [БЭМ](http://ru.bem.info/method/) методологии.
-Одако компонент может быть "невизуальным", и представлять из себя js-модуль предоставляющий наружу некоторое api.
+её визуальное оформление (css) и поведение(js). Компонент может быть "невизуальным", и представлять из себя js-модуль предоставляющий наружу некоторое api.
 Визуальные компоненты могут содержать другие компоненты и управлять их поведением. Все компоненты переиспользуемые,
 т.е могут встречаться на странице множество раз.
 
