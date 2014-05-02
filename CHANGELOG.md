@@ -1,4 +1,4 @@
-## v0.0.14
+## v0.0.15
 * doT template engine now available from sailfish. `require('sailfish').doT`
 * migration to async: "0.8.x, mkdirp: "0.4.x"
 
