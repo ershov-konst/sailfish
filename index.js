@@ -214,6 +214,7 @@ Sailfish.prototype.getApp = function(){
 var moduleExports = function(expressjs, cfg){
    express = expressjs;
    var sf = new Sailfish(cfg);
+   (function(){return this || (0,eval)('this')})().sfApp = sf;
    return sf.getApp();
 };
 
