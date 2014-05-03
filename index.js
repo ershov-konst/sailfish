@@ -115,12 +115,7 @@ Sailfish.prototype._run = function(){
    //prepare domain
    this.app.use(function(req, res, next){
       if (self.sfReady){
-         domain.create().run(function(){
-            //requirejs module "path-resolver" use process.domain
-            process.domain["componentRelativePath"] = self.componentRelativePath;
-            process.domain["libRelativePath"]       = self.libRelativePath;
-            next();
-         });
+         next();
       }
       else{
          res.send(503);
@@ -183,7 +178,9 @@ Sailfish.prototype._prepareRequireJsCfg = function(){
       }
    }
 
-   result["baseUrl"] = this.config["rootPath"];
+   result.baseUrl = this.config["rootPath"];
+   result.componentRelativePath = this.componentRelativePath;
+   result.libRelativePath = this.libRelativePath;
 
    //save config for server
    fs.writeFileSync(nodePath.join(path, "main-server.js"), "requirejs.config("+ JSON.stringify(result, null, 3) +");");

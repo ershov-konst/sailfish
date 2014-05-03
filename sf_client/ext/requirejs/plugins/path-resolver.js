@@ -5,7 +5,12 @@ define(function(){
       if (name.indexOf(".") > -1){ //если в имени содержиться точка, то понимаем, что это компонент
 
          if (typeof window == "undefined"){
-            path.push(process.domain["componentRelativePath"]);
+            if (!config){
+               path.push(process.domain["componentRelativePath"]);
+            }
+            else{
+               path.push(config["componentRelativePath"]);
+            }
          }
          else{
             path.push(config.baseUrl + "components/");
@@ -21,7 +26,13 @@ define(function(){
       }
       else{
          if (typeof window == "undefined"){
-            path.push(process.domain["libRelativePath"]);
+            if (!config){
+               path.push(process.domain["libRelativePath"]);
+            }
+            else{
+               path.push(config["libRelativePath"]);
+            }
+
          }
          else{
             path.push(config.baseUrl + "sf_client/lib/")
