@@ -1,6 +1,6 @@
 {
   "name": "sailfish",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "main": "./index.js",
   "bin": {
     "sailfish": "./bin/sailfish"

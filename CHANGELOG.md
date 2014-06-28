@@ -1,3 +1,10 @@
+## v.0.0.16
+* `js!CompoundComponent` added method getComponentByName
+
+    CompoundComponent.prototype.getComponentByName(name{String})
+    
+* migration to less-middleware: "1.0.x", async: "0.9.x", mkdirp: "0.5.x"
+
 ## v0.0.15
 * doT template engine now available from sailfish. `require('sailfish').doT`
 * migration to async: "0.8.x, mkdirp: "0.4.x"
