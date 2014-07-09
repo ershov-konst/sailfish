@@ -1,6 +1,6 @@
 {
   "name": "sailfish",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "main": "./index.js",
   "bin": {
     "sailfish": "./bin/sailfish"
@@ -8,13 +8,13 @@
   "dependencies": {
     "commander": "2.2.x",
     "walk": "2.3.x",
-    "async": "0.8.x",
+    "async": "0.9.x",
     "node.extend": "1.0.x",
     "dot": "1.0.x",
     "requirejs": "2.1.x",
-    "less-middleware": "0.1.x",
+    "less-middleware": "1.0.x",
     "less": "1.7.x",
-    "mkdirp": "0.4.x"
+    "mkdirp": "0.5.x"
   },
   "description": "sailfish - это фремфорк для создания web-приложений на JavaScript. Фреймворк является самодостаточным, т.е содержит в себе как серверную так и клиентскую части.",
   "devDependencies": {
