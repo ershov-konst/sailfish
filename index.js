@@ -123,10 +123,7 @@ Sailfish.prototype._run = function(){
    });
 
    //less middleware
-   this.app.use('/components', require('less-middleware')({
-      src: this.config["components"],
-      force : true
-   }));
+   this.app.use('/components', require('less-middleware')(this.config["components"]));
 
    //serve dir with build results
    if (!this.config["debug"]) {
