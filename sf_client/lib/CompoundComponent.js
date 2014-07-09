@@ -13,6 +13,9 @@ define("js!CompoundComponent", ["js!utils", "js!BaseComponent"], function(utils,
       },
       getComponentByName: function(name){
          var result = null;
+         if (!name){
+            return null;
+         }
          if (this._components.hasOwnProperty(name)){
             result = this._components[name];
          }
