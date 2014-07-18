@@ -50,9 +50,18 @@ define("js!Class", ["js!utils"], function (utils) {
       function Class() {
          // All construction is actually done in the init method
          if (!initializing && this.init){
-            if ("_options" in this && utils.type(arguments[0]) === "object"){
+            if ("_options" in this){
                var b = this.__getDefaultOptions();
-               this._options = utils.extend(true, b, arguments[0]);
+               switch (utils.type(arguments[0])){
+                  case 'element':
+                     this._options = utils.extend(true, b, utils.parseConfigAttr(arguments[0]));
+                     break;
+                  case 'object':
+                     this._options = utils.extend(true, b, arguments[0]);
+                     break;
+                  default:
+                     throw new Error('can`t resolve options');
+               }
             }
             this.init.apply(this, arguments);
          }

@@ -19,11 +19,9 @@ define('js!BaseComponent', ['js!utils', 'js!Abstract', 'js!dom'], function(utils
 
          switch (utils.type(cfg)){
             case 'element':
-               utils.extend(true, this._options, utils.parseConfigAttr(cfg));
                this._container = cfg;
                break;
             case 'object':
-               utils.extend(true, this._options, cfg);
                this._container = cfg.element;
                break;
             default:
@@ -50,6 +48,7 @@ define('js!BaseComponent', ['js!utils', 'js!Abstract', 'js!dom'], function(utils
 
             this._container = buffer;
             this._container.removeAttribute('config');
+            this._container.sfComponent = this;
          }
       },
       container : function(){
