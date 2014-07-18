@@ -142,13 +142,12 @@ define('js!BaseComponent', ['js!utils', 'js!Abstract', 'js!dom'], function(utils
          return container && container.getAttribute && container.getAttribute('hasmarkup') == 'true';
       },
       _removeContainer : function(){
-         var
-            parent = this._container.parentNode;
-
+         var parent = this._container.parentNode;
          parent.removeChild(this._container);
       },
       destroy : function(){
          this._removeContainer();
+         this._container = null;
          this._super();
       }
    });

@@ -27,6 +27,7 @@ define("js!Abstract", ["js!utils", "js!Class", "js!EventBus"], function (utils, 
       },
       destroy : function(){
          EventBus.removeChannel(this._id);
+         this._eventChannel = null;
       }
    });
 });

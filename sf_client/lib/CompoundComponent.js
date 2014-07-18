@@ -1,14 +1,19 @@
 define("js!CompoundComponent", ["js!utils", "js!BaseComponent"], function(utils, BaseComponent){
 
    var CompoundComponent = BaseComponent.extend({
-      _components: {},
+      _components: null,
+      _componentsIdHash: {},
 
       init : function(cfg){
          this._super(cfg);
 
+         this._components = {};
+         this._componentsIdHash = {};
+
          var components = utils.provideInnerComponents(this._container);
          for (var i = 0, l = components.length; i < l; i++){
-            this._components[components[i].name()] = components[i];
+            this._components[components[i].getId()] = components[i];
+            this._componentsIdHash[components[i].name()] = components[i];
          }
       },
       getComponentByName: function(name){
@@ -31,6 +36,16 @@ define("js!CompoundComponent", ["js!utils", "js!BaseComponent"], function(utils,
          }
 
          return result;
+      },
+      destroy: function(){
+         for (var i in this._componentsIdHash){
+            if (this._componentsIdHash.hasOwnProperty(i)){
+               this._componentsIdHash[i].destroy();
+            }
+         }
+         this._componentsIdHash = null;
+         this._components = null;
+         this._super();
       }
    });
 
