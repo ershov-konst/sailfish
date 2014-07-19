@@ -12,8 +12,8 @@ define("js!CompoundComponent", ["js!utils", "js!BaseComponent"], function(utils,
 
          var components = utils.provideInnerComponents(this._container);
          for (var i = 0, l = components.length; i < l; i++){
-            this._components[components[i].getId()] = components[i];
-            this._componentsIdHash[components[i].name()] = components[i];
+            this._components[components[i].name()] = components[i];
+            this._componentsIdHash[components[i].getId()] = components[i];
          }
       },
       getComponentByName: function(name){
