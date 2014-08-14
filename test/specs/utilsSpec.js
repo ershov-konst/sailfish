@@ -124,6 +124,16 @@ define(['js!utils'], function(utils){
                                  'regexp' : /./gim,
                                  'date' : new Date(),
                                  'infinity' : 1/0
+                              },
+                              {
+                                 'null' : null,
+                                 'undefined' : {}.a,
+                                 'string' : 'str2',
+                                 'number' : 2,
+                                 'boolean' : true,
+                                 'regexp' : /./gim,
+                                 'date' : new Date(),
+                                 'infinity' : 1/0
                               }
                            ]
                         }

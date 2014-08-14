@@ -537,6 +537,9 @@ define('js!utils', ['js!dom'], function(dom){
          else{
             result = '[';
             for (var i = 0, l = v.length; i < l; i++){
+               if (i > 0){
+                  result += ',';
+               }
                result += getStr(v[i], storage);
             }
             result += ']';
