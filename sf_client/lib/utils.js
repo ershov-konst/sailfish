@@ -158,7 +158,8 @@ define('js!utils', ['js!dom'], function(dom){
    function jsonReviver(key, value) {
       var
          fnModuleDecl = /^__fnModuleDecl::/,
-         fnDecl = /^__fnDecl::/;
+         fnDecl = /^__fnDecl::/,
+         dateDecl = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
       if (typeof value == 'string') {
 
@@ -167,6 +168,9 @@ define('js!utils', ['js!dom'], function(dom){
          }
          if (fnDecl.test(value)) {
             return getFnFromStorage(value.replace(fnDecl, ''));
+         }
+         if (dateDecl.test(value)){
+            return new Date(value);
          }
       }
       return value;
