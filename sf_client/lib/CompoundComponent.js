@@ -6,15 +6,7 @@ define("js!CompoundComponent", ["js!utils", "js!BaseComponent"], function(utils,
 
       init : function(cfg){
          this._super(cfg);
-
-         this._components = {};
-         this._componentsIdHash = {};
-
-         var components = utils.provideInnerComponents(this._container);
-         for (var i = 0, l = components.length; i < l; i++){
-            this._components[components[i].name()] = components[i];
-            this._componentsIdHash[components[i].getId()] = components[i];
-         }
+         this._provideInnerComponents();
       },
       getComponentByName: function(name){
          var result = null;
@@ -38,6 +30,20 @@ define("js!CompoundComponent", ["js!utils", "js!BaseComponent"], function(utils,
          return result;
       },
       destroy: function(){
+         this._destroyInnerComponents();
+         this._super();
+      },
+      _provideInnerComponents: function(){
+         this._components = {};
+         this._componentsIdHash = {};
+
+         var components = utils.provideInnerComponents(this._container);
+         for (var i = 0, l = components.length; i < l; i++){
+            this._components[components[i].name()] = components[i];
+            this._componentsIdHash[components[i].getId()] = components[i];
+         }
+      },
+      _destroyInnerComponents: function(){
          for (var i in this._componentsIdHash){
             if (this._componentsIdHash.hasOwnProperty(i)){
                this._componentsIdHash[i].destroy();
@@ -45,7 +51,6 @@ define("js!CompoundComponent", ["js!utils", "js!BaseComponent"], function(utils,
          }
          this._componentsIdHash = null;
          this._components = null;
-         this._super();
       }
    });
 
