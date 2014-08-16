@@ -5,7 +5,6 @@ define('js!BaseComponent', ['js!utils', 'js!Abstract', 'js!dom'], function(utils
       hasClass = /^<[a-z][a-z0-9]*[^>]*?class=('|")/,
       tagStart = /^<[a-z][a-z0-9]*/,
       global = (function(){return this || (0,eval)('this')})();
-   global.require = require;
 
    return Abstract.extend({
       _dotTplFn : null,
@@ -73,7 +72,7 @@ define('js!BaseComponent', ['js!utils', 'js!Abstract', 'js!dom'], function(utils
             constructor = global.require('js!' + componentType);
          }
          catch (e){
-            throw new Error('can`t resolve component type. Markup: \n' + markup);
+            throw new Error('can`t resolve component type. \nOriginal '+ e +'\nMarkup: \n' + markup);
          }
 
          function pushAttr(attrs, name, value){

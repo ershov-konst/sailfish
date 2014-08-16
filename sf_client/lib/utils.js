@@ -16,6 +16,8 @@ define('js!utils', ['js!dom'], function(dom){
        */
       utils = {};
 
+   var global = (function(){return this || (0,eval)('this')})();
+
    /**
     * Convert string value to right type
     * @param {String} value
@@ -196,7 +198,7 @@ define('js!utils', ['js!dom'], function(dom){
          p;
 
       try{
-         result = require(paths[0]);
+         result = global.require(paths[0]);
          if (paths[1]){
             paths = paths[1].split('.');
             while(p = paths.shift()){
@@ -269,7 +271,7 @@ define('js!utils', ['js!dom'], function(dom){
       for (var i = 0, l = collection.length; i < l; i++){
          var cName = collection[i].getAttribute("data-component");
 
-         result.push(new (require("js!" + cName))(collection[i]));
+         result.push(new (global.require("js!" + cName))(collection[i]));
       }
       return result;
    };
@@ -280,7 +282,7 @@ define('js!utils', ['js!dom'], function(dom){
     * @memberof utils
     */
    utils.bootUp = function(deps){
-      require(deps, function(){
+      global.require(deps, function(){
          utils.provideInnerComponents(document.body);
       });
    };
