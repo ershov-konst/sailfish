@@ -8,7 +8,7 @@ define("js!Abstract", ["js!utils", "js!Class", "js!EventBus"], function (utils, 
 
       init : function(){
          this._options.id = this._options.id || utils.generateId();
-         this._eventChannel = EventBus.channel(this._id);
+         this._eventChannel = EventBus.channel(this._options.id);
       },
       trigger : function(type, target){
          this._eventChannel.trigger(type, target);
@@ -26,7 +26,7 @@ define("js!Abstract", ["js!utils", "js!Class", "js!EventBus"], function (utils, 
          return this._options.id;
       },
       destroy : function(){
-         EventBus.removeChannel(this._id);
+         EventBus.removeChannel(this._options.id);
          this._eventChannel = null;
       }
    });
