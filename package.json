@@ -16,7 +16,7 @@
     "less": "1.7.x",
     "mkdirp": "0.5.x"
   },
-  "description": "sailfish - это фремфорк для создания web-приложений на JavaScript. Фреймворк является самодостаточным, т.е содержит в себе как серверную так и клиентскую части.",
+  "description": "Sailfish.js - фреймворк для создания `component-based` веб приложений, основанный на express.js",
   "devDependencies": {
     "karma": "0.12.x",
     "karma-chrome-launcher": "~0.1.3",
