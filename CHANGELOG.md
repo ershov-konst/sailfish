@@ -1,3 +1,9 @@
+## v.0.0.17
+* reduced memory leaks
+* fixed problems with EventBusChannel for Component instances
+* update dependencies
+* minor fixes
+
 ## v.0.0.16
 * `js!CompoundComponent` added method getComponentByName
 
