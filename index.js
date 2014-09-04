@@ -135,10 +135,10 @@ Sailfish.prototype._run = function(){
    this.app.use('/sf_client',  express.static(this.config["sf_client"]));
 
    //render engine
-   this.app.use(function(req, res){
+   this.app.use(function(req, res, next){
       function sendAnswer(err, html){
          if (err){
-            res.error(err);
+            res.send(500, err);
          }
          else{
             res.send(html);
@@ -147,7 +147,9 @@ Sailfish.prototype._run = function(){
 
       res.render = function(view, options){
          self.render.render.apply(self.render, [view, options, sendAnswer]);
-      }
+      };
+
+      next();
    });
 };
 

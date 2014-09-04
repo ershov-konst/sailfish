@@ -2,8 +2,7 @@ define("js!ViewComponent", ["js!utils", "js!Class"], function (utils, Class) {
 
    return Class.extend({
       _components: null,
-      init: function(cfg){
-         this.super(cfg);
+      init: function(){
          this._initComponents();
       },
       _initComponents: function(){
