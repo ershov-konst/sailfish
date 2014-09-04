@@ -132,13 +132,23 @@ Sailfish.prototype._run = function(){
 
    //static files
    this.app.use('/components', express.static(this.config["components"]));
-   this.app.use('/views',      express.static(this.config["views"]));
    this.app.use('/sf_client',  express.static(this.config["sf_client"]));
 
    //render engine
-   this.app.set('views', this.config["views"]);
-   this.app.set('view engine', 'html');
-   this.app.engine('html', this.render.render.bind(this.render));
+   this.app.use(function(req, res){
+      function sendAnswer(err, html){
+         if (err){
+            res.error(err);
+         }
+         else{
+            res.send(html);
+         }
+      }
+
+      res.render = function(view, options){
+         self.render.render.apply(self.render, [view, options, sendAnswer]);
+      }
+   });
 };
 
 /**
