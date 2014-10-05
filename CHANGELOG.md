@@ -1,3 +1,7 @@
+## v.0.0.18
+* ViewComponent as root element
+* minor fixes
+
 ## v.0.0.17
 * reduced memory leaks
 * fixed problems with EventBusChannel for Component instances
