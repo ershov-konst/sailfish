@@ -51,8 +51,7 @@ var Sailfish = function(cfg){
  */
 Sailfish.prototype._validateConfigSync = function(config){
    var optionsToValidate = {
-      'components' : './components',
-      'views'      : './views'
+      'components' : './components'
    };
 
    /**
